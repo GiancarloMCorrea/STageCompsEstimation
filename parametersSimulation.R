@@ -41,6 +41,10 @@ lenBin = 1
 dT = 1
 wS = 0.05
 wT = 0.04
+SpatialScale = 0.3
+SD_O = 0.2
+SD_E = 1
+NuMat = 0.5
 #thPr = 1e-03
 maxNSamAge = 4 # number of ind sampled in station j for age (random sampling)
 #maxNSamPerAge = 120 # max number of ind sampled for age in length bin l in the survey. THIS SHOULD NOT BE A RESTRICTION ? (random sampling)
@@ -77,11 +81,55 @@ firstAgeCRL = 1
 
 # --------------------------------------------------------------
 # Create randon numbers for recruitment
-# in Time:
-rRecTemp = rnorm(n = length(allYears), mean = -(sigmaR^2)/2, sd = sigmaR)
+# Space and spatiotemporal components
 
+# run colors:
+redA = alpha("red", 0.5)
+blueA = alpha("blue", 0.5)
+
+n_years = length(allYears)
+
+# Simualte RF
+model_O = RandomFields::RMmatern(nu = NuMat, var=SD_O^2, scale=SpatialScale) # spatial model component
+model_E = RandomFields::RMmatern(nu = NuMat, var=SD_E^2, scale=SpatialScale) # spatiotemporal model component
+
+# Simulate Omega
+Omega = RFsimulate(model = model_O, x=as.matrix(predictGrid2), grid = FALSE)
+Omega1 = Omega@data[,1]
+
+posV = which(Omega1 > 0)
+negV = which(Omega1 < 0)
+png('RandomField_Recs/RandomField_Rec_Omega.png')
+	plot(NA, NA, xlim = range(predictGrid2$x), ylim = range(predictGrid2$y))
+	points(predictGrid2$x[posV], predictGrid2$y[posV], cex = Omega1[posV]*2, col = redA, pch = 19)
+	points(predictGrid2$x[negV], predictGrid2$y[negV], cex = abs(Omega1[negV])*2, col = blueA, pch = 19)
+dev.off()
+
+# Simulate Epsilon
+n_stations = nrow(predictGrid2)
+Epsilon1 = array(NA, dim=c(n_stations,n_years))
+dimFig = ceiling(sqrt(n_years))
+png('RandomField_Recs/RandomField_Rec_Epsilon.png', height = 600, width = 600, units = 'px', res = 120)
+	par(mfrow = c(dimFig, dimFig))
+for(t in 1:n_years){
+  Epsilon = RFsimulate(model=model_E, x=as.matrix(predictGrid2), grid = FALSE)
+  Epsilon1[,t] = Epsilon@data[,1]
+	posV = which(Epsilon1[,t] > 0)
+	negV = which(Epsilon1[,t] < 0)
+		par(mar = c(0,0,0,0))
+		plot(NA, NA, xlim = range(predictGrid2$x), ylim = range(predictGrid2$y), axes = FALSE)
+		points(predictGrid2$x[posV], predictGrid2$y[posV], cex = Epsilon1[posV,t]*0.2, col = redA, pch = 19)
+		points(predictGrid2$x[negV], predictGrid2$y[negV], cex = abs(Epsilon1[negV,t])*0.2, col = blueA, pch = 19)
+		legend('bottomleft', legend = allYears[t], bty = 'n')
+}
+dev.off()
+	
+
+# Old version
+# in Time:
+#rRecTemp = rnorm(n = length(allYears), mean = -(sigmaR^2)/2, sd = sigmaR)
 # in Space
-sim12 = grf(n = nrow(predictGrid2), grid = as.matrix(predictGrid2), cov.pars=c(0.25, 1), nug = 0, nsim = length(allYears)) # this is the grf
+#sim12 = grf(n = nrow(predictGrid2), grid = as.matrix(predictGrid2), cov.pars=c(0.25, 1), nug = 0, nsim = length(allYears)) # this is the grf
 
 # --------------------------------------------------------------
 # Random Fields for growth parameters 

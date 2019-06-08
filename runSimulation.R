@@ -12,6 +12,7 @@ library(mapdata)
 library(grid)
 library(RColorBrewer)
 require(geoR)
+require(RandomFields)
 
 # call aux functions needed for the simulation:
 source('auxFunctionsSimulation.R')

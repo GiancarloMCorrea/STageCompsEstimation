@@ -11,6 +11,14 @@ NageStrucGridSam = array(NA, dim = c(nrow(predictGrid2), length(allAges), length
 LageStrucGridSam = array(NA, dim = c(nrow(predictGrid2), length(allAges), length(allYears)))#matrix to save the length at age values at the end of the sampling (t1 time)
 
 
+	# Rec for this year:
+	R0year = iniR0
+	
+	# Rec in density terms
+	R0inidenkm2 = log(R0year/StudyArea) # Nfish/km2: density
+	R0inidengrid = R0inidenkm2
+
+
 #currentDate = format(Sys.time(), "%b %d %Y %X")
 #currentDate = gsub(pattern = ' ', replacement = '_', x = currentDate)
 #currentDate = gsub(pattern = ':', replacement = '', x = currentDate)
@@ -21,19 +29,12 @@ alllenData = NULL # to save len data
 allageData = NULL # to save age data
 for(k in seq_along(allYears)){
 
-	# Rec for this year:
-	R0year = exp(log(iniR0) + rRecTemp[k])
-	
-	# Rec in density terms
-	R0inidenkm2 = R0year/StudyArea # Nfish/km2: density
-	R0inidengrid = R0inidenkm2
-
   # Random Fields for recruitment allocation
-	png(paste0('RandomField_Recs/RandomField_Rec_', allYears[k],'.png'))
-	plot(x = sim12[[1]][,1], y = sim12[[1]][,2], cex = sim12$data[,k])
-	dev.off()
+	#png(paste0('RandomField_Recs/RandomField_Rec_', allYears[k],'.png'))
+	#plot(x = sim12[[1]][,1], y = sim12[[1]][,2], cex = sim12$data[,k])
+	#dev.off()
 	
-	yy = sim12$data[,k]
+	#yy = sim12$data[,k]
 
 	# define age sample locations. ALL RANDOM.
 	ageLocations =  sample(x = sampleStations$sampledGrids, size = nSamLoc, replace = FALSE)
@@ -48,12 +49,12 @@ for(k in seq_along(allYears)){
 
 	if(k == 1){
 		# Initial conditions:    
-		R0grid = R0inidengrid*exp(yy[j]) # add spatial random variable
+		R0grid = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k]) # add spatial random variable
 		iniNs   = R0grid*exp(-Z_par*allAges) # take care: Z mortality
 		iniLens = ifelse(allAges <= A1_par, Lminp + (bpar*allAges), Linf+(L1_par-Linf)*exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-A1_par))) # SS growth, Age vs Len relationship
 		lenatage0 = iniLens[1]
 	} else {
-		iniNs = toNewYear(vec = NageStrucGrid[j,,(k-1)], firstVal = R0inidengrid*exp(yy[j])) # define what is R0x
+		iniNs = toNewYear(vec = NageStrucGrid[j,,(k-1)], firstVal = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k])) # define what is R0x
 		iniLens = toNewYear(vec = LageStrucGrid[j,,(k-1)], firstVal = lenatage0)
 	}
 
