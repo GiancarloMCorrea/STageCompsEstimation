@@ -23,11 +23,14 @@ source('parametersSimulation.R')
 # main code for simulation (population and sampling):
 source('mainSimulation3.R') # simulation1 is length stratified. simulation2 is random sampling
 
-# check results from simulation: some figures will be created:
-source('checkSimulation.R')
+# check results from simulation related to spatial and temporal variability in growth: some figures will be created:
+source('checkSimulatedGrowth.R')
 
 # estimates from the sampling output (e.g. total abundance, len abundance):
 source('estimatesSimulation.R')
+
+# check results about temporal abundance in recruitment and abundance
+source('checkAbundances.R')
 
 # Final Step (?): compare age props between different methods
 source('compareMethods.R')

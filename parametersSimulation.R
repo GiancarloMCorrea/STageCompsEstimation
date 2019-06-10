@@ -42,8 +42,8 @@ dT = 1
 wS = 0.05
 wT = 0.04
 SpatialScale = 0.3
-SD_O = 0.2
-SD_E = 1
+SD_O = 0.5
+SD_E = 0.2
 NuMat = 0.5
 #thPr = 1e-03
 maxNSamAge = 4 # number of ind sampled in station j for age (random sampling)
@@ -97,30 +97,26 @@ model_E = RandomFields::RMmatern(nu = NuMat, var=SD_E^2, scale=SpatialScale) # s
 Omega = RFsimulate(model = model_O, x=as.matrix(predictGrid2), grid = FALSE)
 Omega1 = Omega@data[,1]
 
-posV = which(Omega1 > 0)
-negV = which(Omega1 < 0)
 png('RandomField_Recs/RandomField_Rec_Omega.png')
-	plot(NA, NA, xlim = range(predictGrid2$x), ylim = range(predictGrid2$y))
-	points(predictGrid2$x[posV], predictGrid2$y[posV], cex = Omega1[posV]*2, col = redA, pch = 19)
-	points(predictGrid2$x[negV], predictGrid2$y[negV], cex = abs(Omega1[negV])*2, col = blueA, pch = 19)
+print(ggplot() + 
+	geom_point(aes(predictGrid2$x, predictGrid2$y, color = Omega1)) +
+	scale_colour_gradient2(high="red",mid = 'white', low='blue') +
+	theme_bw())
 dev.off()
 
 # Simulate Epsilon
 n_stations = nrow(predictGrid2)
 Epsilon1 = array(NA, dim=c(n_stations,n_years))
 dimFig = ceiling(sqrt(n_years))
-png('RandomField_Recs/RandomField_Rec_Epsilon.png', height = 600, width = 600, units = 'px', res = 120)
-	par(mfrow = c(dimFig, dimFig))
+pdf('RandomField_Recs/RandomField_Rec_Epsilon.pdf')
 for(t in 1:n_years){
   Epsilon = RFsimulate(model=model_E, x=as.matrix(predictGrid2), grid = FALSE)
   Epsilon1[,t] = Epsilon@data[,1]
-	posV = which(Epsilon1[,t] > 0)
-	negV = which(Epsilon1[,t] < 0)
-		par(mar = c(0,0,0,0))
-		plot(NA, NA, xlim = range(predictGrid2$x), ylim = range(predictGrid2$y), axes = FALSE)
-		points(predictGrid2$x[posV], predictGrid2$y[posV], cex = Epsilon1[posV,t]*0.2, col = redA, pch = 19)
-		points(predictGrid2$x[negV], predictGrid2$y[negV], cex = abs(Epsilon1[negV,t])*0.2, col = blueA, pch = 19)
-		legend('bottomleft', legend = allYears[t], bty = 'n')
+		print(ggplot() + 
+			geom_point(aes(predictGrid2$x, predictGrid2$y, color = Epsilon1[,t])) +
+			scale_colour_gradient2(high="red",mid = 'white', low='blue') +
+			labs(color = allYears[t]) +
+			theme_bw())
 }
 dev.off()
 	
