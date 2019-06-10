@@ -22,7 +22,7 @@ allageData = NULL # to save age data
 for(k in seq_along(allYears)){
 
 	# Rec for this year:
-	R0year = exp(log(iniR0) + rRecTemp[k])
+	R0year = iniR0*exp(rRecTemp[k])
 	
 	# Rec in density terms
 	R0inidenkm2 = log(R0year/StudyArea) # Nfish/km2: density
@@ -120,11 +120,13 @@ for(k in seq_along(allYears)){
 		SelAbun2 = rowSums(SelAbun)
 		pL = 1 - exp(-areaSwept*SelAbun)
 		pLsim = structure(vapply(pL, rbinom, numeric(1), n = 1, size = 1), dim=dim(pL))
-		rL = (areaSwept*SelAbun)/pL # modify this later.
+		rL = (areaSwept*SelAbun)/pL # as poisson delta link model. add over pL if it is necessary.
 		findNAN = which(is.nan(rL)|is.infinite(rL))
 		rL[findNAN] = 1 # to avoid warnings
-		rLsim = structure(vapply(log(rL)-(sigmaM^2)/2, rlnorm, numeric(1), n = 1, sdlog = sigmaM), dim=dim(rL))
-		roundAgeLenSampled = round(pLsim*rLsim) # get round sampled matrix
+		#rLsim = structure(vapply(log(rL)-(sigmaM^2)/2, rlnorm, numeric(1), n = 1, sdlog = sigmaM), dim=dim(rL)) # lognormal
+		randomNumbers = structure(rnorm(nrow(rL)*ncol(rL), mean = 0, sd = sigmaM), dim=dim(rL))
+		rLsim = structure(vapply(rL*exp(randomNumbers), rpois, numeric(1), n = 1), dim=dim(rL)) # poisson
+		roundAgeLenSampled = pLsim*rLsim # get round sampled matrix
 		nFishLenSampled = rowSums(roundAgeLenSampled) # here the 1s are deleted.
 		catchStation = sum(nFishLenSampled)
 # --------------------

@@ -62,7 +62,7 @@ F_par = 0.46 # SS results. Apical F
 areaSwept = 0.05 # km2. average of all data: 1994 - 2016. a
 nSamLoc = round(nrow(sampleStations)*0.95) # number of age sample locations. 95% all locations = 332 so far
 sigmaR = 0.66# for recruitment
-sigmaM = 1.3 # for simulated catches
+sigmaM = 0.7 # for simulated catches
 SelecFish = c(0, 0.000231637, 0.00279779, 0.0328583, 0.29149, 0.832831, 0.983694, 0.998633, 0.999887, 
              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) # FISHERY. from age 0 to 20. be sure it has same length as allAges
 SelecSurv = c(0, 1, 1, 1, 1, 1, 1, 1, 1, 
