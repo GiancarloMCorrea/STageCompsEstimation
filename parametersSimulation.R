@@ -83,10 +83,6 @@ firstAgeCRL = 1
 # Create randon numbers for recruitment
 # Space and spatiotemporal components
 
-# run colors:
-redA = alpha("red", 0.5)
-blueA = alpha("blue", 0.5)
-
 n_years = length(allYears)
 
 # Simualte RF
@@ -121,11 +117,8 @@ for(t in 1:n_years){
 dev.off()
 	
 
-# Old version
-# in Time:
-#rRecTemp = rnorm(n = length(allYears), mean = -(sigmaR^2)/2, sd = sigmaR)
-# in Space
-#sim12 = grf(n = nrow(predictGrid2), grid = as.matrix(predictGrid2), cov.pars=c(0.25, 1), nug = 0, nsim = length(allYears)) # this is the grf
+# Add temporal variation based on sigmaR
+rRecTemp = rnorm(n = length(allYears), mean = -(sigmaR^2)/2, sd = sigmaR)
 
 # --------------------------------------------------------------
 # Random Fields for growth parameters 
