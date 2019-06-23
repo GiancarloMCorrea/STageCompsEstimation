@@ -25,8 +25,7 @@ for(k in seq_along(allYears)){
 	R0year = iniR0*exp(rRecTemp[k])
 	
 	# Rec in density terms
-	R0inidenkm2 = log(R0year/StudyArea) # Nfish/km2: density
-	R0inidengrid = R0inidenkm2
+	R0inidengrid = log(R0year/StudyArea) # Nfish/km2: density
 
 	# define age sample locations. ALL RANDOM.
 	ageLocations =  sample(x = sampleStations$sampledGrids, size = nSamLoc, replace = FALSE)
@@ -43,7 +42,8 @@ for(k in seq_along(allYears)){
 		# Initial conditions:    
 		R0grid = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k]) # add spatial random variable
 		iniNs   = R0grid*exp(-Z_par*allAges) # take care: Z mortality
-		iniLens = ifelse(allAges <= A1_par, Lminp + (bpar*allAges), Linf+(L1_par-Linf)*exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-A1_par))) # SS growth, Age vs Len relationship
+		#iniLens = ifelse(allAges <= A1_par, Lminp + (bpar*allAges), Linf+(L1_par-Linf)*exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-A1_par))) # SS growth, Age vs Len relationship
+		iniLens = Linf*(1-exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-t0))) # SS growth, Age vs Len relationship
 		lenatage0 = iniLens[1]
 	} else {
 		iniNs = toNewYear(vec = NageStrucGrid[j,,(k-1)], firstVal = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k])) # define what is R0x
@@ -69,8 +69,10 @@ for(k in seq_along(allYears)){
       
     # }
     
-	sdTmp2 = ifelse(allAges <= A1_par, CV1, (CV1 + ((lTmp2 - L1_par)/(Linf - L1_par))*(CV2-CV1))) # SS growth, Age vs Len relationship
-	sdTmp2 = ifelse(allAges >= A2_par, CV2, sdTmp2) # SS growth, Age vs Len relationship
+#	sdTmp2 = ifelse(allAges <= A1_par, CV1, (CV1 + ((lTmp2 - L1_par)/(Linf - L1_par))*(CV2-CV1))) # SS growth, Age vs Len relationship
+#	sdTmp2 = ifelse(allAges >= A2_par, CV2, sdTmp2) # SS growth, Age vs Len relationship
+
+	sdTmp2 = CV1 + ((lTmp2 - L1_par)/(Linf - L1_par))*(CV2-CV1) # SS growth, Age vs Len relationship
 
 
 		nTmp3 = nTmp2
@@ -217,7 +219,7 @@ for(k in seq_along(allYears)){
   }
   
   #ageStrucAll[k, ] = ageStrucMidYear
-  print(k)
+  # print(k)
 }
 
 write.csv(allcatchData, 'simData/paccod_catch_Sim.csv', row.names = FALSE)
@@ -232,9 +234,6 @@ write.csv(NAgeYearMatrix, 'simData/NAgeYearMat.csv', row.names = FALSE)
 #save(LageStrucGridSam, file = 'simData/simLengthAtAge.RData')
 
 # Plot survey map (for the last year = 2016):
-library(RColorBrewer)
-gradColors = rev(brewer.pal(n = 9, name = "Spectral"))
-gradColors2 = alpha(gradColors, alpha = 0.3)
 
 timeSurvey = data.frame(lon = yy2@coords[,1], lat = yy2@coords[,2], time = 1:nrow(yy2@coords))
 lenStations = data.frame(lon = yy2@coords[sampleStations$sampledGrids, 1], lat = yy2@coords[sampleStations$sampledGrids, 2])
@@ -251,16 +250,18 @@ ageStations = data.frame(lon = yy2@coords[ageLocations, 1], lat = yy2@coords[age
 		# theme_bw())
 # dev.off()
 
-bitmap('surveyDescription2R.tiff', height = 65, width = 130, units = 'mm', res = 600)
-print(ggplot(lenStations, aes(lon, lat)) +
-        geom_point(size = 1) +
-		geom_point(data = ageStations, aes(lon, lat), col = 'red', shape = 2) +
-		#geom_point(data = ageStations2, aes(lon, lat), col = 'blue', shape = 2) +
-		coord_fixed(ratio = 1.1, xlim = c(-179,-158), ylim = c(54,62.5)) +
-		geom_polygon(data = ak, aes(long, lat, group = group), 
-			  fill = 8, color="black") +
-		theme_bw() +
-		xlab('longitude') +
-		ylab('latitude') +
-		theme(plot.margin = unit(c(0,0,0,0),"cm")))
-dev.off()  
+if(!simulation){
+	bitmap('surveyDescription2R.tiff', height = 65, width = 130, units = 'mm', res = 600)
+	print(ggplot(lenStations, aes(lon, lat)) +
+			geom_point(size = 1) +
+			geom_point(data = ageStations, aes(lon, lat), col = 'red', shape = 2) +
+			#geom_point(data = ageStations2, aes(lon, lat), col = 'blue', shape = 2) +
+			coord_fixed(ratio = 1.1, xlim = c(-179,-158), ylim = c(54,62.5)) +
+			geom_polygon(data = ak, aes(long, lat, group = group), 
+				  fill = 8, color="black") +
+			theme_bw() +
+			xlab('longitude') +
+			ylab('latitude') +
+			theme(plot.margin = unit(c(0,0,0,0),"cm")))
+	dev.off()  
+}

@@ -1,6 +1,12 @@
 
 # New Parameters:
 
+# Number of replicates
+nSim = 3
+# Scenario name:
+scenarioName = 'HighS_HighT'
+
+
 # Read some data:
 SelecSurvLen = read.csv('SurveySelecLen.csv') # read survey length selectivity
 sampleStations = read.csv('sampledGrids.csv') # read sample stations. WARNING!!!! THIS SHOULD CHANGE IF THE GRID SIZE CHANGE!!!!!!
@@ -27,9 +33,6 @@ StudyArea = nrow(predictGrid2)*dsGrid*dsGrid*3.43 # in km2 = 1157748
 
 # R0inidengrid = R0inidenkm2*dsGrid*dsGrid*3.43 # abundance per grid.
 
-# Scenario name:
-scenarioName = 'HighS_HighT'
-
 # These parameters will be used later:
 iniYear = 1994
 endYear = 2016
@@ -41,23 +44,24 @@ lenBin = 1
 dT = 1
 wS = 0.05
 wT = 0.04
-SpatialScale = 0.3
+SpatialScale = 0.5
 SD_O = 0.5
 SD_E = 0.2
-NuMat = 0.5
+NuMat = 1
 #thPr = 1e-03
 maxNSamAge = 4 # number of ind sampled in station j for age (random sampling)
 #maxNSamPerAge = 120 # max number of ind sampled for age in length bin l in the survey. THIS SHOULD NOT BE A RESTRICTION ? (random sampling)
 #maxNSamAgeStation = 3 # max number of ind of length bin l sampled in station j for age (random sampling)
 t1 = 0.3 # first dt for natural and fishing mortality
-Linf = 100.6 # L2 in SS
-K_par = 0.175 # 0.195 is the value in SS. seems to be very high.
+Linf = 118.6 # L2 in SS
+K_par = 0.1376 # 0.195 is the value in SS. seems to be very high.
 M_par = 0.34 
 CV1 = 3.45 # this is a sd. 3.45 is the value in SS
 CV2 = 9.586 # this is a sd. 9.586 is the value in SS
 L1_par = 10 # same as SS. L1
 A1_par = 0.5 # same as SS. a3
 A2_par = 18.5 # a4 in SS
+t0 = -0.168
 F_par = 0.46 # SS results. Apical F
 areaSwept = 0.05 # km2. average of all data: 1994 - 2016. a
 nSamLoc = round(nrow(sampleStations)*0.95) # number of age sample locations. 95% all locations = 332 so far
@@ -79,46 +83,10 @@ allLens = seq(from = minLen, to = maxLen, by = lenBin)
 agePlus = 12
 firstAgeCRL = 1
 
-# --------------------------------------------------------------
-# Create randon numbers for recruitment
-# Space and spatiotemporal components
+# some colors
+gradColors = rev(brewer.pal(n = 9, name = "Spectral"))
+gradColors2 = alpha(gradColors, alpha = 0.3)
 
-n_years = length(allYears)
-
-# Simualte RF
-model_O = RandomFields::RMmatern(nu = NuMat, var=SD_O^2, scale=SpatialScale) # spatial model component
-model_E = RandomFields::RMmatern(nu = NuMat, var=SD_E^2, scale=SpatialScale) # spatiotemporal model component
-
-# Simulate Omega
-Omega = RFsimulate(model = model_O, x=as.matrix(predictGrid2), grid = FALSE)
-Omega1 = Omega@data[,1]
-
-png('RandomField_Recs/RandomField_Rec_Omega.png')
-print(ggplot() + 
-	geom_point(aes(predictGrid2$x, predictGrid2$y, color = Omega1)) +
-	scale_colour_gradient2(high="red",mid = 'white', low='blue') +
-	theme_bw())
-dev.off()
-
-# Simulate Epsilon
-n_stations = nrow(predictGrid2)
-Epsilon1 = array(NA, dim=c(n_stations,n_years))
-dimFig = ceiling(sqrt(n_years))
-pdf('RandomField_Recs/RandomField_Rec_Epsilon.pdf')
-for(t in 1:n_years){
-  Epsilon = RFsimulate(model=model_E, x=as.matrix(predictGrid2), grid = FALSE)
-  Epsilon1[,t] = Epsilon@data[,1]
-		print(ggplot() + 
-			geom_point(aes(predictGrid2$x, predictGrid2$y, color = Epsilon1[,t])) +
-			scale_colour_gradient2(high="red",mid = 'white', low='blue') +
-			labs(color = allYears[t]) +
-			theme_bw())
-}
-dev.off()
-	
-
-# Add temporal variation based on sigmaR
-rRecTemp = rnorm(n = length(allYears), mean = -(sigmaR^2)/2, sd = sigmaR)
 
 # --------------------------------------------------------------
 # Random Fields for growth parameters 
