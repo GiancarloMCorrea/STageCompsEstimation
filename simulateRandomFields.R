@@ -25,13 +25,15 @@ if(simulation){
 }
 
 # Plot both fields
-if(!simulation){
-	png('RandomField_Recs/RandomField_Rec_Omega.png', width = 800, height = 700, units = 'px')
+	png(paste0('RandomField_Recs/RandomField_Rec_Omega', ix,'.png'), width = 800, height = 700, units = 'px')
 	print(ggplot() + 
 		geom_point(aes(predictGrid2$x, predictGrid2$y, color = Omega1)) +
 		scale_colour_gradient2(high="red",mid = 'white', low='blue') +
 		theme_bw())
 	dev.off()
+
+if(!simulation){
+
 
 
 	pdf('RandomField_Recs/RandomField_Rec_Epsilon.pdf')

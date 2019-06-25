@@ -222,13 +222,17 @@ for(k in seq_along(allYears)){
   # print(k)
 }
 
-write.csv(allcatchData, 'simData/paccod_catch_Sim.csv', row.names = FALSE)
-write.csv(alllenData, 'simData/paccod_len_Sim.csv', row.names = FALSE)
-write.csv(allageData, 'simData/paccod_age_Sim.csv', row.names = FALSE)
+if(!simulation){
+	write.csv(allcatchData, 'simData/paccod_catch_Sim.csv', row.names = FALSE)
+	write.csv(alllenData, 'simData/paccod_len_Sim.csv', row.names = FALSE)
+	write.csv(allageData, 'simData/paccod_age_Sim.csv', row.names = FALSE)
+}
 
 # needed for compareMethods.R:
 NAgeYearMatrix = t(apply(X = NageStrucGridSam, MARGIN = c(2,3), FUN = mean)*StudyArea)
-write.csv(NAgeYearMatrix, 'simData/NAgeYearMat.csv', row.names = FALSE)
+if(!simulation){
+	write.csv(NAgeYearMatrix, 'simData/NAgeYearMat.csv', row.names = FALSE)
+}
 
 #save(NageStrucGridSam, file = 'simData/simAgeStructure.RData')
 #save(LageStrucGridSam, file = 'simData/simLengthAtAge.RData')

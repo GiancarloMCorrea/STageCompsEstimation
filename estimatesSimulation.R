@@ -1,9 +1,13 @@
 #  ------------------------------------------------------------------------
 # Compare Methods from simulated data:
 # IMPORTANT: DONT APPLY rm FUNCTION BECAUSE THIS SCRIPT USES INFORMATION FROM runSimulation.R
-data2 = read.csv("simData/paccod_catch_Sim.csv")
-data3 = read.csv("simData/paccod_len_Sim.csv")
-data4 = read.csv("simData/paccod_age_Sim.csv")
+#data2 = read.csv("simData/paccod_catch_Sim.csv")
+#data3 = read.csv("simData/paccod_len_Sim.csv")
+#data4 = read.csv("simData/paccod_age_Sim.csv")
+
+data2 = allcatchData
+data3 = alllenData
+data4 = allageData
 
 # fake sex:
 data3$SEX = 1
@@ -159,5 +163,7 @@ for(i in seq_along(uniYr)){
   #print(i)
 }
 
-write.csv(outdat, "simData/abunlen_stratum1Sim.csv", row.names = F)
-write.csv(outdat2, "simData/abunlen_stratum2Sim.csv", row.names = F)
+if(!simulation){
+	write.csv(outdat, "simData/abunlen_stratum1Sim.csv", row.names = F)
+	write.csv(outdat2, "simData/abunlen_stratum2Sim.csv", row.names = F)
+}

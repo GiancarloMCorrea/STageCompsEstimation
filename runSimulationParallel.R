@@ -30,16 +30,16 @@ foreach(ix = 1:nSim) %dopar% {
 
 
 	# call aux functions needed for the simulation:
-	source('auxFunctionsSimulation.R')
+	source('auxFunctionsSimulation.R', local = TRUE)
 
 	# parameters for the simulation and estimation step:
-	source('parametersSimulation.R')
+	source('parametersSimulation.R', local = TRUE)
 
 	# simulate Random Fields for recruitment
-	source('simulateRandomFields.R')
+	source('simulateRandomFields.R', local = TRUE)
 
 	# main code for simulation (population and sampling):
-	source('mainSimulation3.R') # simulation1 is length stratified. simulation2 is random sampling
+	source('mainSimulation3.R', local = TRUE) # simulation1 is length stratified. simulation2 is random sampling
 
 	# if(!simulation){
 		# # check results from simulation related to spatial and temporal variability in growth: some figures will be created:
@@ -47,27 +47,16 @@ foreach(ix = 1:nSim) %dopar% {
 	# }
 	
 	# estimates from the sampling output (e.g. total abundance, len abundance):
-	source('estimatesSimulation.R')
+	source('estimatesSimulation.R', local = TRUE)
 
 	# if(!simulation){
 		# # check results about temporal abundance in recruitment and abundance
 		# source('checkAbundances.R')
 	# }
-	
-	# Final Step (?): compare age props between different methods
-	source('compareMethods.R')
 
+	# Final Step (?): compare age props between different methods
+	source('compareMethods.R', local = TRUE)
+	
 }
 
 stopCluster(cl)
-
-# save performance indicators
-# write.csv(savePerfInd, paste0('simData/savePerfInd', scenarioName, '.csv'), row.names = FALSE)
-
-
- # foreach(ix = 1:nSim) %dopar% {
-	# #inx = ix
-	 # xa = data.frame(h = 1:5)
-	 # xa$rep2 = ix
-	 # write.csv(xa, paste0('prueba', ix, '.csv'))
-  # }

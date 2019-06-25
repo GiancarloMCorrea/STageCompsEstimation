@@ -1,11 +1,15 @@
 #  ------------------------------------------------------------------------
 # Read again data:
 
-data2 = read.csv("simData/paccod_catch_Sim.csv")
-data3 = read.csv("simData/paccod_len_Sim.csv")
-data4 = read.csv("simData/paccod_age_Sim.csv")
-outdat2 = read.csv('simData/abunlen_stratum2Sim.csv')
-NAgeYearMatrix = read.csv('simData/NAgeYearMat.csv')
+# data2 = read.csv("simData/paccod_catch_Sim.csv")
+# data3 = read.csv("simData/paccod_len_Sim.csv")
+# data4 = read.csv("simData/paccod_age_Sim.csv")
+# outdat2 = read.csv('simData/abunlen_stratum2Sim.csv')
+# NAgeYearMatrix = read.csv('simData/NAgeYearMat.csv')
+
+data2 = allcatchData
+data3 = alllenData
+data4 = allageData
 
 #  ------------------------------------------------------------------------
 # prepare data for abundance per len per station estimation:
@@ -552,7 +556,7 @@ if(!simulation){
 #  ------------------------------------------------------------------------
 
 # ADD HERE PREVIOUS TREATMENT FOR SIMULATION:
-savePerfInd = rbind(savePerfInd, allMethodsPropYear2)
+#savePerfInd = rbind(savePerfInd, allMethodsPropYear2)
 ###
-
+write.csv(allMethodsPropYear2, paste0('simPerInd/replicate_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
 #allMethodsPropYear2$RMSE_2 = allMethodsPropYear2$RMSE_1^0.5 # THIS IS THE RMSE_a,y. 

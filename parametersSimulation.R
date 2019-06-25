@@ -1,10 +1,14 @@
 
 # New Parameters:
 
-# Number of replicates
-nSim = 3
-# Scenario name:
-scenarioName = 'HighS_HighT'
+	# define if simulation is run. if simulation is FALSE, all plots will be created.
+	simulation = TRUE
+	# Scenario name:
+	scenarioName = 'HighS_HighT'
+
+# if(!simulation){
+	# nSim = 1
+# }
 
 
 # Read some data:
@@ -90,6 +94,7 @@ gradColors2 = alpha(gradColors, alpha = 0.3)
 
 # --------------------------------------------------------------
 # Random Fields for growth parameters 
+
 gDummy2 = gstat(formula=z~1+x+y, locations=~x+y, dummy=T, beta=c(0,0.1,0.3), 
                  model=vgm(psill=0.05, range=5, model='Mat'), nmax = 15)
 yy2 = predict(gDummy2, newdata=predictGrid2, nsim=1)
@@ -98,6 +103,8 @@ yy2$sim1 = normalize(x = yy2$sim1, method = 'range', range = c(wS,-1*wS)) # this
 
 ak = map_data('worldHires','USA:Alaska')
 ak = ak[ak$long < 0, ]
+
+if(!simulation){
 bitmap('RandomField_K.tiff', height = 65, width = 130, units = 'mm', res = 600)
 print(map.heatmap(lat = yy2@coords[,2], lon = yy2@coords[,1], yy2@data,
               color_low = "blue", color_high = "red", zeroiswhite = TRUE, xlim = c(-179,-158), ylim = c(54,62.5)) +
@@ -108,6 +115,7 @@ print(map.heatmap(lat = yy2@coords[,2], lon = yy2@coords[,1], yy2@data,
 			  #xlim(-180,-156) +
 			  theme(plot.margin = unit(c(0,0,0,0),"cm")))
 dev.off()  
+}
   
 # Temporal trend in K parameter:
 KparT = normalize(x = allYears, method = 'range', range = c(-1*wT,wT))
