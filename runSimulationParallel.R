@@ -27,7 +27,7 @@ foreach(ix = 1:nSim) %dopar% {
 	library(RColorBrewer)
 	require(geoR)
 	require(RandomFields)
-
+	require(reshape)
 
 	# call aux functions needed for the simulation:
 	source('auxFunctionsSimulation.R', local = TRUE)
@@ -47,7 +47,7 @@ foreach(ix = 1:nSim) %dopar% {
 	# }
 	
 	# estimates from the sampling output (e.g. total abundance, len abundance):
-	source('estimatesSimulation.R', local = TRUE)
+	source('estimatesSimulation2.R', local = TRUE)
 
 	# if(!simulation){
 		# # check results about temporal abundance in recruitment and abundance
@@ -55,7 +55,7 @@ foreach(ix = 1:nSim) %dopar% {
 	# }
 
 	# Final Step (?): compare age props between different methods
-	source('compareMethods.R', local = TRUE)
+	source('compareMethods2.R', local = TRUE)
 	
 }
 
