@@ -6,7 +6,7 @@ library(doSNOW)
 
 
 # Number of replicates
-nSim = 3
+nSim = 100
 
 cores = detectCores()
 cl = makeCluster(cores[1] - 1)
@@ -41,18 +41,8 @@ foreach(ix = 1:nSim) %dopar% {
 	# main code for simulation (population and sampling):
 	source('mainSimulation3.R', local = TRUE) # simulation1 is length stratified. simulation2 is random sampling
 
-	# if(!simulation){
-		# # check results from simulation related to spatial and temporal variability in growth: some figures will be created:
-		# source('checkSimulatedGrowth.R')
-	# }
-	
 	# estimates from the sampling output (e.g. total abundance, len abundance):
 	source('estimatesSimulation2.R', local = TRUE)
-
-	# if(!simulation){
-		# # check results about temporal abundance in recruitment and abundance
-		# source('checkAbundances.R')
-	# }
 
 	# Final Step (?): compare age props between different methods
 	source('compareMethods2.R', local = TRUE)

@@ -155,3 +155,6 @@ normDF = function(dat, fac1 = 'AGE', fac2 = 'YEAR', normcol = 'LENGTH', maxAge =
 	return(outdat)
 
 }
+
+
+

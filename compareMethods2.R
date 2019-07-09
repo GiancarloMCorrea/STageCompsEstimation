@@ -15,7 +15,8 @@ allMethodsPropYear = NULL
 # CALCULATE REAL AGE PROPORTIONS:
 
 # HERE I SHOULD MULTIPLY THIS MATRIX BY SELECTIVITY AT AGE OF THE SURVEY:
-NAgeYearMatrix2 = sweep(NAgeYearMatrix, MARGIN=2, SelecSurv, `*`)
+NAgeYearMatrix2 = sweep(NAgeYearMatrix, MARGIN=2, SelecSurv, `*`) # AGE 0 is not considered
+#NAgeYearMatrix2 = NAgeYearMatrix
 PropAgeYearMatrix = sweep(NAgeYearMatrix2, MARGIN=1, rowSums(NAgeYearMatrix2), `/`) # get prop matrix per year
 
 # convert Matrix to DF:
@@ -29,7 +30,8 @@ PropAgeYearMatrix2 = PropAgeYearMatrix[,1:which(as.numeric(colnames(PropAgeYearM
 PropAgeYearDF = as.data.frame(as.table(as.matrix(PropAgeYearMatrix2)))
 names(PropAgeYearDF) = c('YEAR', 'AGE', 'FREQUENCY') # FREQUENCY is p^_a
 PropAgeYearDF$AGE = as.numeric(as.character(PropAgeYearDF$AGE))
-PropAgeYearDF$METHOD = 'True'
+PropAgeYearDF$METHOD = 'Truex'
+PropAgeYearDF = PropAgeYearDF[PropAgeYearDF$AGE >= minEstAge, ]
 
 # Save data frame:
 allMethodsPropYear = rbind(allMethodsPropYear, PropAgeYearDF)
@@ -37,11 +39,19 @@ allMethodsPropYear = rbind(allMethodsPropYear, PropAgeYearDF)
 #  ------------------------------------------------------------------------
 # METHOD 1: UNIQUE ALK FOR ALL YEARS. (TO DO: select 0.5stations to simulate a 'data poor' case)
 
-nages = length(allAges) # fix number
+allEstAges = minEstAge:maxAge
+nages = (maxAge - minEstAge) + 1 # fix number
 nlen = (maxLen - minLen) + 1 # use data3 because length data has more len bins
 fakeLen = seq(minLen, maxLen, by = 1)
 
-tmp = data4
+# select just the 50% of the sampling stations per year
+data2$INDEX = as.numeric(as.character(paste0(data2$YEAR, data2$STATIONID)))
+data4$INDEX = as.numeric(as.character(paste0(data4$YEAR, data4$STATIONID)))
+indx = as.vector(unlist(by(data = data2$INDEX, INDICES = data2$YEAR, FUN = sample, size = round(nSamLoc*0.5))))
+data6 = data4[data4$INDEX %in% indx, ]
+
+# begin analysis
+tmp = data6
 tmpMat = matrix(NA, ncol = nages, nrow = nlen)
   
 agefac = sort(unique(tmp$AGE)) # THE FIRST AGE MUST BE 1 !!!!!(OK FOR NOW)
@@ -54,7 +64,7 @@ for(j in seq_along(agefac)){
     
 }
 
-colnames(tmpMat) = allAges 
+colnames(tmpMat) = allEstAges 
 rownames(tmpMat) = fakeLen
 tmpMat[which(is.na(tmpMat))] = 0
 
@@ -84,7 +94,8 @@ allMethodsPropYear = rbind(allMethodsPropYear, met1df)
 #  ------------------------------------------------------------------------
 # METHOD 2: UNIQUE ALK FOR EACH YEAR.
 
-nages = length(allAges) # fix number
+allEstAges = minEstAge:maxAge
+nages = (maxAge - minEstAge) + 1 # fix number
 nlen = (maxLen - minLen) + 1 # use data3 because length data has more len bins
 fakeLen = seq(minLen, maxLen, by = 1)
 
@@ -104,7 +115,7 @@ for(k in seq_along(allYears)){
 		
 	}
 
-	colnames(tmpMat) = allAges 
+	colnames(tmpMat) = allEstAges 
 	rownames(tmpMat) = fakeLen
 	tmpMat[which(is.na(tmpMat))] = 0
 
@@ -183,7 +194,7 @@ allMethodsPropYear = rbind(allMethodsPropYear, met3df)
 # 4) GAM (CRL approach) per year: PROPAGE ~ LENGTH + s(LON, LAT)
 
 mydatagam = data4
-mydatagam = mydatagam[mydatagam$AGE >= firstAgeCRL, ] # CUT IN firstAgeCRL ALL DATA!
+#mydatagam = mydatagam[mydatagam$AGE >= minEstAge, ] # CUT IN firstAgeCRL ALL DATA!
 # Its better if I set the initial age to model and estimate the final age for each year.
 # Its important to discuss this in the manuscript as a drawback of this method.
 
@@ -210,8 +221,9 @@ for(j in seq_along(yearsfac)){
   tmpages = as.numeric(names(tmptab))
   tmpfreq = as.vector(tmptab)
 
-  plusAgeCRL = agesCRL(ages = tmpages, freq = tmpfreq, thr = 5) # 5 ind as a thr?
-	#print(plusAgeCRL)
+  # plusAgeCRL = agesCRL(ages = tmpages, freq = tmpfreq, thr = 5) # 5 ind as a thr?
+  plusAgeCRL = agePlus
+  #print(plusAgeCRL)
 	
   subdata = mydatagam[mydatagam$YEAR == yearsfac[j], ]
   data3sub = data3[data3$YEAR == yearsfac[j], ]
@@ -234,8 +246,8 @@ for(j in seq_along(yearsfac)){
     } else {
       
       subdata$AGEFAC = ifelse(test = subdata$AGE > allages[ii], 0, 1)
-      modtmp = gam(AGEFAC ~ LENGTH + s(LON,LAT,k=10),family = binomial,
-                   data = subdata,method = "REML")
+      modtmp = gam(AGEFAC ~ LENGTH + s(LON, LAT, k = 10),family = binomial,
+                   data = subdata, method = "ML")
       predtmp = predict(modtmp, newdata = data3sub, type = 'response')
       predvals = as.vector(predtmp)
 	  elimina = which(subdata$AGEFAC == 1)
@@ -286,41 +298,23 @@ allMethodsPropYear = rbind(allMethodsPropYear, met4df)
 # SAVE FILE:
 
 allMethodsPropYear$replicate = ix # add replicate column
-if(!simulation){
+
+# format data and choose just years with sampling:
+allMethodsPropYear$YEAR = as.numeric(as.character(allMethodsPropYear$YEAR))
+allMethodsPropYear$AGE = as.numeric(as.character(allMethodsPropYear$AGE))
+allMethodsPropYear = allMethodsPropYear[allMethodsPropYear$YEAR >= iniYearSam, ] 
+
+if(ix == 1){
 	write.csv(allMethodsPropYear, paste0('simData/AllPropData', scenarioName, '.csv'), row.names = FALSE) # It is better to calculate RMSEage and RMSEyear and RMSEtot in Excel to avoid confusion.
 }
 
-#  ------------------------------------------------------------------------
-# Plot all methods: Figure 1
-if(!simulation){
-
-	png(paste0('compareProportions_', scenarioName, '.png'), height = 700, width = 900, units = 'px', res = 130)
-	print(ggplot(allMethodsPropYear, aes(AGE, FREQUENCY)) +
-			geom_line(aes(color = factor(METHOD))) +
-			facet_wrap( ~ factor(YEAR), ncol = 5) +
-			theme_bw() +
-			scale_x_discrete(limits = 0:agePlus))
-	dev.off()
-
-	bitmap(paste0('compareProportions_', scenarioName, '.tiff'), height = 190, width = 190, units = 'mm', res = 900)
-	print(ggplot(allMethodsPropYear, aes(AGE, FREQUENCY)) +
-			geom_line(aes(color = factor(METHOD))) +
-			xlab('Age') +
-			ylab('Proportion') +
-			facet_wrap( ~ factor(YEAR), ncol = 5) +
-			theme_bw() +
-			theme(legend.position = c(0.75, 0.05), legend.title = element_blank()) +
-			scale_x_discrete(limits = 0:agePlus)) 
-	dev.off() 
-
-}
 #  ------------------------------------------------------------------------
 # Plot all methods: Figure 2
 
 nameallmethods = unique(allMethodsPropYear$METHOD)
 
-allMethods = allMethodsPropYear[-which(allMethodsPropYear$METHOD == 'True'), ] # True just to be sure
-TrueMethod = allMethodsPropYear[which(allMethodsPropYear$METHOD == 'True'), ]
+allMethods = allMethodsPropYear[-which(allMethodsPropYear$METHOD == 'Truex'), ] # True just to be sure
+TrueMethod = allMethodsPropYear[which(allMethodsPropYear$METHOD == 'Truex'), ]
 
 allMethodsPropYear2 = NULL # THIS DF HAS (Pest - Ptrue)^2
 FacYear = unique(TrueMethod$YEAR)
@@ -343,28 +337,6 @@ for(k in seq_along(FacYear)){
 
 }
 
-if(!simulation){
-
-	png(paste0('compareProportions2_', scenarioName, '.png'), height = 700, width = 900, units = 'px', res = 130)
-	print(ggplot(allMethodsPropYear2, aes(AGE, FREQUENCY2)) +
-			geom_line(aes(color = factor(METHOD))) +
-			facet_wrap( ~ factor(YEAR), ncol = 5) +
-			theme_bw() +
-			scale_x_discrete(limits = 0:agePlus)) 
-	dev.off()
-
-	bitmap(paste0('compareProportions2_', scenarioName, '.tiff'), height = 190, width = 190, units = 'mm', res = 900)
-	print(ggplot(allMethodsPropYear2, aes(AGE, FREQUENCY2)) +
-			geom_line(aes(color = factor(METHOD))) +
-			xlab('Age') +
-			ylab('Error for estimates of proportion-at-age (%)') +
-			facet_wrap( ~ factor(YEAR), ncol = 5) +
-			theme_bw() +
-			theme(legend.position = c(0.75, 0.08), legend.title = element_blank()) +
-			scale_x_discrete(limits = 0:agePlus))
-	dev.off() 
-
-}
 
 #  ------------------------------------------------------------------------
 # Get table: indicators (WARNING!!!!!)
@@ -374,6 +346,5 @@ if(!simulation){
 # ADD HERE PREVIOUS TREATMENT FOR SIMULATION:
 #savePerfInd = rbind(savePerfInd, allMethodsPropYear2)
 ###
-write.csv(allMethodsPropYear, paste0('simPerInd1/replicate_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
-write.csv(allMethodsPropYear2, paste0('simPerInd2/replicate_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
-#allMethodsPropYear2$RMSE_2 = allMethodsPropYear2$RMSE_1^0.5 # THIS IS THE RMSE_a,y. 
+write.csv(allMethodsPropYear, paste0('simPerInd1/replicate1_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
+write.csv(allMethodsPropYear2, paste0('simPerInd2/replicate2_', ix, '_', scenarioName, '.csv'), row.names = FALSE)

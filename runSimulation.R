@@ -1,18 +1,7 @@
-rm(list = ls())
-
-library(foreach)
-library(doParallel)
-library(doSNOW)
-
 
 # Number of replicates
-nSim = 3
+ix = 1
 
-cores = detectCores()
-cl = makeCluster(cores[1] - 1)
-registerDoSNOW(cl)
-
-foreach(ix = 1:nSim) %dopar% {
 
 	# Required libraries:
 	require(sp)
@@ -27,6 +16,7 @@ foreach(ix = 1:nSim) %dopar% {
 	library(RColorBrewer)
 	require(geoR)
 	require(RandomFields)
+	require(reshape)
 
 
 	# call aux functions needed for the simulation:
@@ -41,33 +31,8 @@ foreach(ix = 1:nSim) %dopar% {
 	# main code for simulation (population and sampling):
 	source('mainSimulation3.R') # simulation1 is length stratified. simulation2 is random sampling
 
-	# if(!simulation){
-		# # check results from simulation related to spatial and temporal variability in growth: some figures will be created:
-		# source('checkSimulatedGrowth.R')
-	# }
-	
 	# estimates from the sampling output (e.g. total abundance, len abundance):
-	source('estimatesSimulation.R')
+	source('estimatesSimulation2.R')
 
-	# if(!simulation){
-		# # check results about temporal abundance in recruitment and abundance
-		# source('checkAbundances.R')
-	# }
-	
 	# Final Step (?): compare age props between different methods
-	source('compareMethods.R')
-
-}
-
-stopCluster(cl)
-
-# save performance indicators
-# write.csv(savePerfInd, paste0('simData/savePerfInd', scenarioName, '.csv'), row.names = FALSE)
-
-
- # foreach(ix = 1:nSim) %dopar% {
-	# #inx = ix
-	 # xa = data.frame(h = 1:5)
-	 # xa$rep2 = ix
-	 # write.csv(xa, paste0('prueba', ix, '.csv'))
-  # }
+	source('compareMethods2.R')

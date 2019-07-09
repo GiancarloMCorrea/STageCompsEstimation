@@ -4,7 +4,7 @@
 data2 = read.csv("simData/paccod_catch_Sim.csv")
 data3 = read.csv("simData/paccod_len_Sim.csv")
 data4 = read.csv("simData/paccod_age_Sim.csv")
-outdat2 = read.csv('simData/abunlen_stratum2Sim.csv')
+#outdat2 = read.csv('simData/abunlen_stratum2Sim.csv')
 
 #  ------------------------------------------------------------------------
 # Compare simulated total abundance and estimated (from sampling) total abundance:

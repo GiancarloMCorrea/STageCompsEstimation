@@ -25,13 +25,13 @@ for(k in seq_along(allYears)){
 	R0year = iniR0*exp(rRecTemp[k])
 	
 	# Rec in density terms
-	R0inidengrid = log(R0year/StudyArea) # Nfish/km2: density
+	R0inidengrid = log(R0year/StudyArea) # Nfish/km2: mean density in log scale
 
 	# define age sample locations. ALL RANDOM.
 	ageLocations =  sample(x = sampleStations$sampledGrids, size = nSamLoc, replace = FALSE)
 
 	# length counting in samples: max should be 25
-	tmpLenCount = 0
+	# tmpLenCount = 0
 
 	# create vector of sample for age
 	# nFishAgeSampled = numeric(length(allLens))
@@ -40,10 +40,10 @@ for(k in seq_along(allYears)){
 
 	if(k == 1){
 		# Initial conditions:    
-		R0grid = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k]) # add spatial random variable
+		R0grid = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k]) # add spatial and spatiotemporal structure
 		iniNs   = R0grid*exp(-Z_par*allAges) # take care: Z mortality
 		#iniLens = ifelse(allAges <= A1_par, Lminp + (bpar*allAges), Linf+(L1_par-Linf)*exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-A1_par))) # SS growth, Age vs Len relationship
-		iniLens = Linf*(1-exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-t0))) # SS growth, Age vs Len relationship
+		iniLens = Linf*(1-exp(-(K_par+KparT[k]+yy2$sim1[j])*(allAges-t0))) # VB growth
 		lenatage0 = iniLens[1]
 	} else {
 		iniNs = toNewYear(vec = NageStrucGrid[j,,(k-1)], firstVal = exp(R0inidengrid + Omega1[j] + Epsilon1[j,k])) # define what is R0x
@@ -82,7 +82,7 @@ for(k in seq_along(allYears)){
     
     # Create Age Length matrix after first half: (just for sampled grids)
 	
-	if(j %in% sampleStations$sampledGrids){
+	if(j %in% sampleStations$sampledGrids & allYears[k] %in% allYearsSam){
 	
 		AgeLenMatrixProp = matrix(NA, ncol = length(allAges), nrow = length(allLens))
 		
@@ -118,7 +118,7 @@ for(k in seq_along(allYears)){
 # Here: sampling strategy:
 # --------------------
 		# follow Thorson and Haltuch 2019 method: delta model (see equation 16). and Thorson (2018): select length and age at the same time
-		SelAbun = sweep(AgeLenMatrix, MARGIN=1, SelecSurvLen$selex, `*`)
+		SelAbun = sweep(AgeLenMatrix, MARGIN=2, SelecSurv, `*`)
 		SelAbun2 = rowSums(SelAbun)
 		pL = 1 - exp(-areaSwept*SelAbun)
 		pLsim = structure(vapply(pL, rbinom, numeric(1), n = 1, size = 1), dim=dim(pL))
@@ -144,46 +144,60 @@ for(k in seq_along(allYears)){
 								NUMBER_FISH = nFishSampled)
 		allcatchData = rbind(allcatchData, catchData)
 
-		# check sampling: (len data): all catch sampled for len
-		# nFishLenSampled = rowSums(roundAgeLenSampled)
-		posLenSam = which(nFishLenSampled > 0)
+		# check sampling: (len data): apply function. max th
+		
 		if(nFishSampled > 0){ # just for positive catches
-			lenData = data.frame(YEAR = allYears[k], STATIONID = j, LON = sampleStations$lon[sampleStations$sampledGrids == j], 
-								   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
-									STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
-									STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
-									TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
-									LENGTH = allLens[posLenSam], FREQUENCY = nFishLenSampled[posLenSam])
-			#lenData = lenData[-which(lenData$freq == 0), ]
-			alllenData = rbind(alllenData, lenData)
+			# For catch sample less than th:
+			if(nFishSampled <= lenCatchTh){
+				nFishLenSampled2 = nFishLenSampled
+				posLenSam = which(nFishLenSampled2 > 0)
+				lenData = data.frame(YEAR = allYears[k], STATIONID = j, LON = sampleStations$lon[sampleStations$sampledGrids == j], 
+									   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
+										STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
+										STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
+										TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
+										LENGTH = allLens[posLenSam], FREQUENCY = nFishLenSampled2[posLenSam])
+				alllenData = rbind(alllenData, lenData)
+			}
+			# For catch sample greater than th:
+			if(nFishSampled > lenCatchTh){
+				nFishLenSampled3 = sample(x = rep(allLens, times = nFishLenSampled), size = lenCatchTh, replace = FALSE)
+				prev2 = table(nFishLenSampled3)
+				nFishLenSampled2 = numeric(length(allLens))
+				nFishLenSampled2[allLens %in% as.numeric(names(prev2))] = as.vector(prev2)
+			
+				posLenSam = which(nFishLenSampled2 > 0)
+				lenData = data.frame(YEAR = allYears[k], STATIONID = j, LON = sampleStations$lon[sampleStations$sampledGrids == j], 
+									   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
+										STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
+										STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
+										TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
+										LENGTH = allLens[posLenSam], FREQUENCY = nFishLenSampled2[posLenSam])
+				alllenData = rbind(alllenData, lenData)
+			}
+			
 		}
 
 		# check sampling: (age data): simple strategy: max 25 ind per length IN THE SURVEY. max 50 ind sampled in a station. max 3 ind per length in A STATION.
 		
-		# ALL AREA ALL STATIONS: RANDOM SAMPLING. Max 7 ind per station. 330 stations sampled. Max 3 ind per station per length bin.
-		if(j %in% ageLocations & max(nFishLenSampled) > 0){ # no run this part if the n fish sampled for length  = 0
+		# ALL AREA ALL STATIONS: RANDOM SAMPLING. 
+		if(j %in% ageLocations & nFishSampled > 0){ # no run this part if the n fish sampled for length  = 0
 		
-		#tmpLenCount = tmpLenCount + nFishAgeSampled
-
-			if(maxNSamAge > sum(nFishLenSampled)){
-				lFishSampled = rep(allLens, times = nFishLenSampled) # max ind per set for age sample = 40. FIRST CONDITIONAL				
+			# choose length to be age sampled:
+			if(maxNSamAge > sum(nFishLenSampled2)){
+				lFishSampled = rep(allLens, times = nFishLenSampled2) # max ind per set for age sample = 40. FIRST CONDITIONAL				
 			} else {
-				lFishSampled = sample(x = rep(allLens, times = nFishLenSampled), size = maxNSamAge, replace = FALSE) # max ind per set for age sample = 40. FIRST CONDITIONAL
+				lFishSampled = sample(x = rep(allLens, times = nFishLenSampled2), size = maxNSamAge, replace = FALSE) # max ind per set for age sample = 40. FIRST CONDITIONAL
 			}
 			
 			prev = table(lFishSampled)
 			nFishToAge = numeric(length(allLens))
 			nFishToAge[allLens %in% as.numeric(names(prev))] = as.vector(prev)
 			
-				#condLenSam = tmpLenCount > maxNSamPerAge # max num per len IN THE SURVEY = 20?*0.5. select rows with more than that number.
-
-				#nFishAgeSampled = nFishLenSampled2 # create vector of the number of fish sample for age
-				#nFishAgeSampled[nFishAgeSampled > maxNSamAgeStation] = maxNSamAgeStation # n fish age sampled for that station. SECOND CONDITIONAL
-				#nFishAgeSampled[condLenSam] = 0	# n fish sample = 0 to length with more than 25 samples. 	
-				
+					# now, choose age at length to be sampled:
 					if(max(nFishToAge) > 0){ # just if there are more lengths to be aged
 						agesSam = ageSample(mat = roundAgeLenSampled, vec = nFishToAge)
-						lensSam = sort(lFishSampled) # length in order
+						lensSam = rep(as.numeric(names(prev)), times = as.numeric(prev)) # length in order
 
 						ageData = data.frame(YEAR = allYears[k], STATIONID = j, LON = sampleStations$lon[sampleStations$sampledGrids == j], 
 									   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
@@ -196,10 +210,8 @@ for(k in seq_along(allYears)){
 
 		}
     
-#		nTmp3 = nTmp2 - colSums(AgeLenSampled) # after survey sampled (not sure about this)
 		nTmp3 = nTmp2
 		lTmp3 = lTmp2
-#    	sdTmp3 = sdTmp2
 
 	}
     
@@ -222,16 +234,16 @@ for(k in seq_along(allYears)){
   # print(k)
 }
 
-if(!simulation){
-	write.csv(allcatchData, 'simData/paccod_catch_Sim.csv', row.names = FALSE)
-	write.csv(alllenData, 'simData/paccod_len_Sim.csv', row.names = FALSE)
-	write.csv(allageData, 'simData/paccod_age_Sim.csv', row.names = FALSE)
+if(ix == 1){
+	write.csv(allcatchData, paste0('simData/paccod_catch_Sim_', scenarioName, '.csv'), row.names = FALSE)
+	write.csv(alllenData, paste0('simData/paccod_len_Sim_', scenarioName, '.csv'), row.names = FALSE)
+	write.csv(allageData, paste0('simData/paccod_age_Sim_', scenarioName, '.csv'), row.names = FALSE)
 }
 
 # needed for compareMethods.R:
-NAgeYearMatrix = t(apply(X = NageStrucGridSam, MARGIN = c(2,3), FUN = mean)*StudyArea)
-if(!simulation){
-	write.csv(NAgeYearMatrix, 'simData/NAgeYearMat.csv', row.names = FALSE)
+NAgeYearMatrix = t(apply(X = NageStrucGridSam, MARGIN = c(2,3), FUN = sum)*GridArea)
+if(ix == 1){
+	write.csv(NAgeYearMatrix, paste0('simData/NAgeYearMat_', scenarioName, '.csv'), row.names = FALSE)
 }
 
 #save(NageStrucGridSam, file = 'simData/simAgeStructure.RData')
@@ -254,8 +266,8 @@ ageStations = data.frame(lon = yy2@coords[ageLocations, 1], lat = yy2@coords[age
 		# theme_bw())
 # dev.off()
 
-if(!simulation){
-	bitmap('surveyDescription2R.tiff', height = 65, width = 130, units = 'mm', res = 600)
+if(ix == 1){
+	bitmap(paste0('surveyDescription2R_', scenarioName, '.tiff'), height = 65, width = 130, units = 'mm', res = 600)
 	print(ggplot(lenStations, aes(lon, lat)) +
 			geom_point(size = 1) +
 			geom_point(data = ageStations, aes(lon, lat), col = 'red', shape = 2) +

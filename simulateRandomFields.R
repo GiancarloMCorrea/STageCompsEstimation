@@ -17,24 +17,22 @@ n_stations = nrow(predictGrid2)
 Epsilon1 = array(NA, dim=c(n_stations,n_years))
 dimFig = ceiling(sqrt(n_years))
 
-if(simulation){
+if(ix > 1){
 	for(t in 1:n_years){
 	  Epsilon = RFsimulate(model=model_E, x=as.matrix(predictGrid2), grid = FALSE)
 	  Epsilon1[,t] = Epsilon@data[,1]
 	}
 }
 
-# Plot both fields
+
+if(ix == 1){
+
 	png(paste0('RandomField_Recs/RandomField_Rec_Omega', ix,'.png'), width = 800, height = 700, units = 'px')
 	print(ggplot() + 
 		geom_point(aes(predictGrid2$x, predictGrid2$y, color = Omega1)) +
 		scale_colour_gradient2(high="red",mid = 'white', low='blue') +
 		theme_bw())
 	dev.off()
-
-if(!simulation){
-
-
 
 	pdf('RandomField_Recs/RandomField_Rec_Epsilon.pdf')
 	for(t in 1:n_years){
