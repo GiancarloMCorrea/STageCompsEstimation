@@ -17,6 +17,7 @@ ix = 1
 	require(geoR)
 	require(RandomFields)
 	require(reshape)
+	require(gridExtra)
 
 
 	# call aux functions needed for the simulation:

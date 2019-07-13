@@ -6,13 +6,13 @@ library(doSNOW)
 
 
 # Number of replicates
-nSim = 100
+nSim = 300
 
 cores = detectCores()
 cl = makeCluster(cores[1] - 1)
 registerDoSNOW(cl)
 
-foreach(ix = 1:nSim) %dopar% {
+foreach(ix = 100:nSim) %dopar% {
 
 	# Required libraries:
 	require(sp)
@@ -27,6 +27,7 @@ foreach(ix = 1:nSim) %dopar% {
 	library(RColorBrewer)
 	require(geoR)
 	require(RandomFields)
+	require(gridExtra)
 	require(reshape)
 
 	# call aux functions needed for the simulation:

@@ -53,7 +53,7 @@ maxLen = 120
 minLen = 1
 lenBin = 1
 dT = 1
-wS = 0.05
+wS = 0.03
 wT = 0.03
 SpatialScale = 0.5
 SD_O = 0.5
@@ -70,8 +70,8 @@ M_par = 0.34
 
 # I consider that the best way to control the spatiotemporal variability in growth and spawning time on size-at-age CV is 
 # to fix these number and just vary saptial and temporal components of the K parameter. 
-CV1 = 1 # this is a sd. 3.45 is the value in SS
-CV2 = 4 # this is a sd. 9.586 is the value in SS
+CV1 = 0.8 # this is a sd. 3.45 is the value in SS
+CV2 = 3 # this is a sd. 9.586 is the value in SS
 
 L1_par = 10 # same as SS. L1
 A1_par = 0.5 # same as SS. a3
@@ -143,6 +143,7 @@ print(map.heatmap(lat = yy2@coords[,2], lon = yy2@coords[,1], yy2@data,
 			  xlab('longitude') +
 			  ylab('latitude') +
 			  #xlim(-180,-156) +
+			  theme(legend.position = 'none') +
 			  theme(plot.margin = unit(c(0,0,0,0),"cm")))
 dev.off()  
 

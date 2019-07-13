@@ -87,10 +87,10 @@ map.heatmap <- function (lat, lon, data,
   p <- ggplot(dfMap, aes(x=lon, y=lat, fill=Value)) + theme_bw()
   p <- p + geom_tile()
   p <- p + geom_polygon(data=baseData, aes(x=long, y=lat, group=group), 
-                        colour="black", fill="white", alpha=0) 
+                        colour="black", fill=8) 
   p <- p + labs(title=paste(mainTitle,"\n",sep=""), x="", y="")
-  p <- p + theme(plot.title = element_text(size = rel(1.5))) 
-  p <- p + coord_fixed(ratio=1.1, xlim=xlim, ylim=ylim)
+  #p <- p + theme(plot.title = element_text(size = rel(1.5))) 
+  p <- p + coord_fixed(ratio=1, xlim=xlim, ylim=ylim)
 
   if(zeroiswhite){
     p <- p + scale_fill_gradient2(low=color_low,
