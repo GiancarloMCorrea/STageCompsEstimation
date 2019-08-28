@@ -79,7 +79,8 @@ tempo = data3$C_L_I * outAL[match(data3$LENGTH, rownames(outAL)), ]
 tempo2 = rowsum(x = tempo, group = data3$ID_HAUL)
 yearsfactor = data2$YEAR[match(rownames(tempo2), data2$ID_HAUL)]
 tempo3 = rowsum(x = tempo2, group = yearsfactor)
-catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+catchtot = data.frame(YEAR = names(rowSums(tempo3)), x = as.vector(rowSums(tempo3)))
 finalmat = sweep(tempo3, MARGIN=1, catchtot$x, `/`)
 finalmat = as.data.frame(finalmat)
 finalmat$YEAR = rownames(finalmat)
@@ -132,7 +133,8 @@ for(k in seq_along(allYears)){
 	tempo = data3tmp$C_L_I * outAL[match(data3tmp$LENGTH, rownames(outAL)), ]
 	tempo2 = rowsum(x = tempo, group = data3tmp$ID_HAUL)
 	tempo3 = colSums(tempo2)
-	catchtot = sum(data2tmp$NUMBER_FISH)
+	#catchtot = sum(data2tmp$NUMBER_FISH)
+	catchtot = sum(tempo3)
 	finalmat = tempo3/catchtot
 	finalmat = data.frame(YEAR = allYears[k], AGE = names(finalmat), FREQUENCY = as.vector(finalmat))
 	met2df = rbind(met2df, finalmat)
@@ -177,7 +179,8 @@ for(j in seq_along(yearsfac)){
 }
 
 dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
-catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
 catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
 dwriteAll2$x = dwriteAll2$x/catchinorder
 met3df = dwriteAll2 
