@@ -283,6 +283,9 @@ for(j in seq_along(yearsfac)){
   age_gam = gam(AGE~s(LENGTH)+s(LON,LAT,k=10), data=subdata, family = tw, 
 			method = 'REML')
 
+	bitmap(paste0('FinalFigures/Method3_Gau_', scenarioName, '.tiff'), height = 120, width = 120, units = 'mm', res = 900)
+	 	gam.check(age_gam)
+    dev.off()
 
   # predict data
   data3tmp$AGE = as.vector(predict(age_gam,newdata=data3tmp,type='response'))
