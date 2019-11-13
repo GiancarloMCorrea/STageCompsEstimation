@@ -4,15 +4,15 @@ library(foreach)
 library(doParallel)
 library(doSNOW)
 
-
+#setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 # Number of replicates
-nSim = 300
+nSim = 350
 
 cores = detectCores()
-cl = makeCluster(cores[1] - 1)
+cl = makeCluster(cores[1] - 2)
 registerDoSNOW(cl)
 
-foreach(ix = 100:nSim) %dopar% {
+foreach(ix = 1:nSim) %dopar% {
 
 	# Required libraries:
 	require(sp)

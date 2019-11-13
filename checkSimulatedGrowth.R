@@ -2,7 +2,13 @@ require(RColorBrewer)
 require(ggplot2)
 library(mapdata)
 require(BBmisc)
+library(gridExtra)
+
+setwd(dir = 'C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+
 source('auxFunctionsSimulation.R')
+minFigAge = 1
+maxFigAge = 6
 
 #  ------------------------------------------------------------------------
 #  plot spatial variability in growth:
@@ -16,7 +22,9 @@ data4 = read.csv(paste0('simData/paccod_age_Sim_', scenarioName, '.csv'))
 # Temporal variability
 
 # Classic palette BuPu, with 4 colors
-coul = rev(brewer.pal(n = 9, name = "Spectral"))
+#coul = rev(brewer.pal(n = 9, name = "Spectral"))
+coul = c(rev(brewer.pal(n = 9, name = "Blues")), brewer.pal(n = 9, name = "Reds"))
+
  
 # I can add more tones to this palette :
 coul2 = colorRampPalette(coul)(length(unique(data4$YEAR)))
@@ -37,10 +45,10 @@ data4xx = data4[data4$AGE < 7, ]
 
 
 bitmap(paste0('FinalFigures/checkTemporalVariability2_', scenarioName, '.tiff'), height = 100, width = 190, units = 'mm', res = 800)
-print(ggplot(data4xx, aes(x = factor(YEAR), y = LENGTH, fill = factor(YEAR))) +
-       geom_boxplot(outlier.size = 0.2, width = 0.8, position=position_dodge(width=0.6)) +
-	   scale_fill_manual(values = coul2) +
-	   scale_color_manual(values = coul2) +
+print(ggplot(data4xx, aes(x = factor(YEAR), y = LENGTH)) +
+       geom_boxplot(outlier.size = 0.2, width = 0.8, position=position_dodge(width=0.6),  fill = '#A4A4A4') +
+	   #scale_fill_manual(values = coul2) +
+	   #scale_color_manual(values = coul2) +
 	   facet_wrap( ~ AGE, ncol = 3, scales = 'free_y') +
 	   theme_bw() +
 	   theme(legend.position = 'none') +
@@ -54,29 +62,69 @@ dev.off()
 #  ------------------------------------------------------------------------
 # Spatial Variability
 
-gradColors = rev(brewer.pal(n = 9, name = "Spectral"))
+#gradColors = rev(brewer.pal(n = 9, name = "Spectral"))
+gradColors = c(rev(brewer.pal(n = 9, name = "Blues")), brewer.pal(n = 9, name = "Reds"))
 
-data42 = normDF(dat = data4)
-data42xx = data42[data42$AGE > 0 & data42$AGE < 7, ]
-data42xx$AGE = as.factor(data42xx$AGE)
+#data42 = normDF(dat = data4)
+data42 = data4
+# data42xx = data42[data42$AGE > 0 & data42$AGE < 7, ]
+# data42xx$AGE = as.factor(data42xx$AGE)
 ak = map_data('worldHires','USA:Alaska')
 ak = ak[ak$long < 0, ]
-#temp2 = aggregate(data4xx$LENGTH, list(LON = data4xx$LON, LAT = data4xx$LAT, AGE = data4xx$AGE), mean)
+# #temp2 = aggregate(data4xx$LENGTH, list(LON = data4xx$LON, LAT = data4xx$LAT, AGE = data4xx$AGE), mean)
 
-bitmap(paste0('FinalFigures/checkSpatialVariability2_', scenarioName, '.tiff'), height = 100, width = 190, units = 'mm', res = 800)
-print(ggplot() +
-		geom_polygon(data = ak, aes(long, lat, group = group), 
-			   fill = 8, color="black") +
-		geom_point(data = data42xx, mapping = aes(LON, LAT, color = LENGTH), size = 0.4) +
-		scale_colour_gradientn(colours = gradColors) +
-		facet_wrap( ~ AGE, ncol = 3) +
-		coord_fixed(ratio = 1.1, xlim = c(-179,-158), ylim = c(54,62.5)) +				   
-		theme_bw() +
-		xlab('longitude') +
-		ylab('latitude') +
-		theme(legend.position = 'none') +
-		theme(plot.margin = unit(c(0,0,0,0),"cm")))
-dev.off() 
+# bitmap(paste0('FinalFigures/checkSpatialVariability2_', scenarioName, '.tiff'), height = 100, width = 190, units = 'mm', res = 800)
+# print(ggplot() +
+# 		geom_polygon(data = ak, aes(long, lat, group = group), 
+# 			   fill = 8, color="black") +
+# 		geom_point(data = data42xx, mapping = aes(LON, LAT, color = LENGTH), size = 0.4) +
+# 		scale_colour_gradientn(colours = gradColors) +
+# 		facet_wrap( ~ AGE, ncol = 3) +
+# 		coord_fixed(ratio = 1.1, xlim = c(-179,-158), ylim = c(54,62.5)) +				   
+# 		theme_bw() +
+# 		xlab('longitude') +
+# 		ylab('latitude') +
+# 		theme(legend.position = 'none') +
+# 		theme(plot.margin = unit(c(0,0,0,0),"cm")))
+# dev.off() 
+
+figList = list()
+for(k in minFigAge:maxFigAge){
+
+data42xx1 = data42[data42$AGE == k, ]
+data42xx1 = aggregate(data42xx1$LENGTH, list(LON = data42xx1$LON, LAT = data42xx1$LAT), mean)
+names(data42xx1) = c('LON', 'LAT', 'LENGTH')
+
+if(k %in% c(4,5,6)) { 
+	xLab = 'longitude' 
+} else {
+	xLab = '' 
+}
+
+if(k %in% c(1,4)) { 
+	yLab = 'latitude' 
+} else {
+	yLab = '' 
+}
+
+	figList[[k]] = ggplot() +
+					geom_polygon(data = ak, aes(long, lat, group = group), 
+						   fill = 8, color="black") +
+					geom_point(data = data42xx1, mapping = aes(LON, LAT, color = LENGTH), size = 0.4) +
+					scale_colour_gradientn(colours = gradColors) +
+					coord_fixed(ratio = 1.1, xlim = c(-180,-158), ylim = c(52,62.5)) +				   
+					theme_bw() +
+					xlab(xLab) + 
+					ylab(yLab) +
+					annotate(geom="text", x=-160, y=62, label=paste0('Age ', k)) +
+					theme(legend.position = c(0.11, 0.32), legend.title = element_blank(), legend.key.size = unit(0.2, "cm"), legend.text = element_text(size = 6)) +
+					theme(plot.margin = unit(c(0,0,0,0),"cm"))
+
+}
+
+bitmap(paste0('FinalFigures/checkSpatialVariability3_', scenarioName, '.tiff'), height = 100, width = 190, units = 'mm', res = 800)
+	do.call("grid.arrange", c(figList, ncol = ceiling(maxFigAge/2)))
+dev.off()
 
 
 #  ------------------------------------------------------------------------

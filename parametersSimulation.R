@@ -1,6 +1,8 @@
 
 # New Parameters:
 
+setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+
 	# define if simulation is run. if simulation is FALSE, all plots will be created.
 	simulation = TRUE
 	# Scenario name:
@@ -108,7 +110,7 @@ gradColors2 = alpha(gradColors, alpha = 0.3)
 # Random Fields for growth parameters 
 
 # Spatial:
-	gDummy2 = gstat(formula=z~1+x+y, locations=~x+y, dummy=T, beta=c(0,0.1,0.3), 
+	gDummy2 = gstat(formula=z~1+x+y, locations=~x+y, dummy=T, beta=c(0,0.15,0.5), 
 					 model=vgm(psill=0.05, range=5, model='Mat'), nmax = 15)
 	yy2 = predict(gDummy2, newdata=predictGrid2, nsim=1)
 	gridded(yy2) = ~x+y
@@ -135,7 +137,7 @@ if(ix == 1){
 ak = map_data('worldHires','USA:Alaska')
 ak = ak[ak$long < 0, ]
 
-bitmap(paste0('RandomField_K_', scenarioName, '.tiff'), height = 65, width = 130, units = 'mm', res = 600)
+bitmap(paste0('RandomField_K_', scenarioName, '.tiff'), height = 65, width = 130, units = 'mm', res = 900)
 print(map.heatmap(lat = yy2@coords[,2], lon = yy2@coords[,1], yy2@data,
               color_low = "blue", color_high = "red", zeroiswhite = TRUE, xlim = c(-179,-158), ylim = c(54,62.5)) +
 			  geom_polygon(data = ak, aes(long, lat, group = group), 
@@ -143,8 +145,7 @@ print(map.heatmap(lat = yy2@coords[,2], lon = yy2@coords[,1], yy2@data,
 			  xlab('longitude') +
 			  ylab('latitude') +
 			  #xlim(-180,-156) +
-			  theme(legend.position = 'none') +
-			  theme(plot.margin = unit(c(0,0,0,0),"cm")))
+			  theme(legend.position = c(0.15, 0.15), plot.margin = unit(c(0,0,0,0),"cm"), legend.key.width = unit(0.5, "cm")))
 dev.off()  
 
 }

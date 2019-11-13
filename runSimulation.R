@@ -1,3 +1,4 @@
+setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 
 # Number of replicates
 ix = 1

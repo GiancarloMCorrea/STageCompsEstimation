@@ -65,7 +65,7 @@ NindAgeSample = function(vec, maxSam = 50){
 
 
 
-map.heatmap <- function (lat, lon, data, 
+map.heatmap = function (lat, lon, data, 
                          color_low="white",color_high="darkred", 
 						 color_na=gray(0.9),zeroiswhite=FALSE,
                          xlim=NULL, ylim=NULL, zlim=NULL,
@@ -97,7 +97,9 @@ map.heatmap <- function (lat, lon, data,
                                   high=color_high,
                                   na.value=color_na,
                                   limits=zlim,
-                                  name=legendTitle) 
+                                  breaks = c(min(dfMap$Value), 0, max(dfMap$Value)),
+                                  name=legendTitle,
+                                  guide = guide_colourbar(direction = "horizontal")) 
   }
   if(!zeroiswhite){
     p <- p + scale_fill_gradient(low=color_low, 

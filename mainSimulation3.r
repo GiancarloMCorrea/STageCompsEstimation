@@ -269,7 +269,7 @@ ageStations = data.frame(lon = yy2@coords[ageLocations, 1], lat = yy2@coords[age
 if(ix == 1){
 
 	ax1 = map.heatmap(lat = yy2@coords[,2], lon = yy2@coords[,1], yy2@data,
-              color_low = "blue", color_high = "red", zeroiswhite = TRUE, xlim = c(-179,-158), ylim = c(54,62.5)) +
+              color_low = "blue", color_high = "red", zeroiswhite = TRUE, xlim = c(-179,-158), ylim = c(53.5,63)) +
 			  geom_polygon(data = ak, aes(long, lat, group = group), 
 			  fill = 8, color="black") +
 			  xlab('longitude') +
@@ -280,19 +280,19 @@ if(ix == 1){
 	
 	
 	ax2 = ggplot(lenStations, aes(lon, lat)) +
-			geom_point(size = 1) +
-			geom_point(data = ageStations, aes(lon, lat), col = 'red', shape = 2) +
+			geom_point(size = 0.9) +
+			#geom_point(data = ageStations, aes(lon, lat), col = 'red', shape = 2) +
 			#geom_point(data = ageStations2, aes(lon, lat), col = 'blue', shape = 2) +
 			geom_polygon(data = ak, aes(long, lat, group = group), 
 				  fill = 8, color="black") +
 			theme_bw() +
-			xlab('longitude') +
+			xlab(' ') +
 			ylab('latitude') +
-			coord_fixed(ratio=1, xlim=c(-179,-158), ylim=c(54,62.5)) +
+			coord_fixed(ratio=1, xlim=c(-179,-158), ylim=c(53.5,63)) +
 			theme(plot.margin = unit(c(0,0,0,0),"cm"))
 
 
-	bitmap(paste0('surveyDescription3R_', scenarioName, '.tiff'), height = 130, width = 120, units = 'mm', res = 600)
+	bitmap(paste0('surveyDescription3R_', scenarioName, '.tiff'), height = 110, width = 90, units = 'mm', res = 500)
 	
 	grid.arrange(ax2, ax1, nrow = 2)
 			
