@@ -315,7 +315,7 @@ for(j in seq_along(yearsfac)){
   data3tmp = data3[data3$YEAR == yearsfac[j], ]
   
   # run the model GAM:
-  age_glm = glm(AGE ~ LENGTH, data=subdata, family = Gamma)
+  age_glm = glm(AGE ~ LENGTH, data=subdata, family = poisson)
 
 
   # predict data
@@ -362,7 +362,7 @@ for(j in seq_along(yearsfac)){
   data3tmp = data3[data3$YEAR == yearsfac[j], ]
   
   # run the model GAM:
-  age_glm = glm(AGE ~ LENGTH + STRATUM3, data=subdata, family = Gamma)
+  age_glm = glm(AGE ~ LENGTH + STRATUM3, data=subdata, family = poisson)
 
 
   # predict data
@@ -406,7 +406,6 @@ allMethodsPropYear$YEAR = as.numeric(as.character(allMethodsPropYear$YEAR))
 allMethodsPropYear$AGE = as.numeric(as.character(allMethodsPropYear$AGE))
 allMethodsPropYear = allMethodsPropYear[allMethodsPropYear$YEAR >= iniYearSam, ] 
 
-dir.create('simData', showWarnings = FALSE)
 
 if(ix == 1){
 	write.csv(allMethodsPropYear, paste0('simData/AllPropData', scenarioName, '.csv'), row.names = FALSE) # It is better to calculate RMSEage and RMSEyear and RMSEtot in Excel to avoid confusion.

@@ -238,6 +238,8 @@ for(k in seq_along(allYears)){
   # print(k)
 }
 
+dir.create('simData', showWarnings = FALSE)
+
 if(ix == 1){
 	write.csv(allcatchData, paste0('simData/paccod_catch_Sim_', scenarioName, '.csv'), row.names = FALSE)
 	write.csv(alllenData, paste0('simData/paccod_len_Sim_', scenarioName, '.csv'), row.names = FALSE)

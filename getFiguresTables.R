@@ -33,8 +33,8 @@ allMethodsPropYear4 = aggregate(allMethodsPropYear3$MRE*100, list(YEAR = allMeth
 allMethodsMRE = aggregate(allMethodsPropYear3$MRE*100, list(METHOD = allMethodsPropYear3$METHOD), mean)
 allMethodsMSE = aggregate(allMethodsPropYear3$MSE*10^5, list(METHOD = allMethodsPropYear3$METHOD), mean)
 
-write.csv(allMethodsMRE, paste0('MRE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
-write.csv(allMethodsMSE, paste0('MSE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
+#write.csv(allMethodsMRE, paste0('MRE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
+#write.csv(allMethodsMSE, paste0('MSE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
 
 
 #  ------------------------------------------------------------------------
