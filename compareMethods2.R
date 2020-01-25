@@ -406,6 +406,8 @@ allMethodsPropYear$YEAR = as.numeric(as.character(allMethodsPropYear$YEAR))
 allMethodsPropYear$AGE = as.numeric(as.character(allMethodsPropYear$AGE))
 allMethodsPropYear = allMethodsPropYear[allMethodsPropYear$YEAR >= iniYearSam, ] 
 
+dir.create('simData', showWarnings = FALSE)
+
 if(ix == 1){
 	write.csv(allMethodsPropYear, paste0('simData/AllPropData', scenarioName, '.csv'), row.names = FALSE) # It is better to calculate RMSEage and RMSEyear and RMSEtot in Excel to avoid confusion.
 }
@@ -448,5 +450,9 @@ for(k in seq_along(FacYear)){
 # ADD HERE PREVIOUS TREATMENT FOR SIMULATION:
 #savePerfInd = rbind(savePerfInd, allMethodsPropYear2)
 ###
+
+dir.create('simPerInd1', showWarnings = FALSE)
+dir.create('simPerInd2', showWarnings = FALSE)
+
 write.csv(allMethodsPropYear, paste0('simPerInd1/replicate1_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
 write.csv(allMethodsPropYear2, paste0('simPerInd2/replicate2_', ix, '_', scenarioName, '.csv'), row.names = FALSE)

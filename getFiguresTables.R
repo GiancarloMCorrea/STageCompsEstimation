@@ -6,7 +6,7 @@ require(grid)
 
 #setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 # These two values should be the same as in paramtersSimulation:
-scenarioName = 'NoS_NoT'
+scenarioName = 'HighS_HighT'
 agePlus = 8
 
 # New parameters
@@ -26,6 +26,15 @@ for(k in seq_along(allFiles22)){
 
 allMethodsPropYear4 = aggregate(allMethodsPropYear3$MRE*100, list(YEAR = allMethodsPropYear3$YEAR, 
 								AGE = allMethodsPropYear3$AGE, METHOD = allMethodsPropYear3$METHOD), mean)
+
+
+### GENERAL PLOT: GENERAL COMPARISON:
+
+allMethodsMRE = aggregate(allMethodsPropYear3$MRE*100, list(METHOD = allMethodsPropYear3$METHOD), mean)
+allMethodsMSE = aggregate(allMethodsPropYear3$MSE*10^5, list(METHOD = allMethodsPropYear3$METHOD), mean)
+
+write.csv(allMethodsMRE, paste0('MRE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
+write.csv(allMethodsMSE, paste0('MSE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
 
 
 #  ------------------------------------------------------------------------
