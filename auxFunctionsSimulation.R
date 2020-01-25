@@ -112,6 +112,55 @@ map.heatmap = function (lat, lon, data,
 return(p)}
 
 
+
+map.heatmap2 = function (lat, lon, data, data2,
+                         color_low="white",color_high="darkred", 
+						 color_na=gray(0.9),zeroiswhite=FALSE,
+                         xlim=NULL, ylim=NULL, zlim=NULL,
+                         mainTitle="", legendTitle="", pSize = 2) {
+
+  # Store the base data of the underlying map
+  #baseData <- map_data("state")
+
+  # Combine the data into a dataframe
+  dfMap           <- as.data.frame(cbind(lon, lat, data))
+  colnames(dfMap) <- c("lon", "lat", "Value")
+
+  # Set limits for x, y, z if not specified as parameters
+  if (is.null(xlim)) { xlim <- range( lon,na.rm=TRUE) }
+  if (is.null(ylim)) { ylim <- range( lat,na.rm=TRUE) }
+  if (is.null(zlim)) { zlim <- range(data,na.rm=TRUE) }
+
+  # Create the plot
+  p <- ggplot(data = dfMap, aes(x =lon, y=lat)) + theme_bw()
+  p <- p + geom_tile(aes(fill=Value))
+  p <- p + geom_point(data = data2, mapping =  aes(x = lon, y = lat, z = NULL), size = pSize)
+  #p <- p + geom_polygon(data=baseData, aes(x=long, y=lat, group=group), 
+  #                      colour="black", fill=8) 
+  p <- p + labs(title=paste(mainTitle,"\n",sep=""), x="", y="")
+  #p <- p + theme(plot.title = element_text(size = rel(1.5))) 
+  p <- p + coord_fixed(ratio=1, xlim=xlim, ylim=ylim)
+
+  if(zeroiswhite){
+    p <- p + scale_fill_gradient2(low=color_low,
+                                  high=color_high,
+                                  na.value=color_na,
+                                  limits=zlim,
+                                  breaks = c(min(dfMap$Value), 0, max(dfMap$Value)),
+                                  name=legendTitle,
+                                  guide = guide_colourbar(direction = "horizontal")) 
+  }
+  if(!zeroiswhite){
+    p <- p + scale_fill_gradient(low=color_low, 
+                                 high=color_high,
+                                 na.value=color_na,
+                                 limits=zlim,
+                                 name=legendTitle) 
+  }
+
+return(p)}
+
+
 # addalpha()
 addalpha <- function(colors, alpha=1.0) {
   r <- col2rgb(colors, alpha=T)

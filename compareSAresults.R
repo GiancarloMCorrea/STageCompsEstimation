@@ -100,7 +100,7 @@ bitmap('FinalFigures/compare_estimatedSS3_allMethods2.tiff', height = 190, width
 # 2) This is the second part of the study case section
 # Run a model with length and age data and compare numbers at age among length model and (length and age) model
 
-setwd(dir = 'C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+setwd(dir = 'C:/Users/moroncog/Documents/Year1_OSUPhD/Simulations_SAmodels/StockAssessmentModels2')
 require(r4ss)
 require(reshape2)
 require(ggplot2)
@@ -124,7 +124,7 @@ nest1sub6 = sweep(nest1sub5, MARGIN = 1, rowSums(nest1sub5), `/`) # est comps
 names(nest1sub6) = c('1', '2', '3', '4', '5', '6', '7', '8')
 
 # read the model 1 and check results
-modelName1 = 'StockAssessmentModels/Method1_6'
+modelName1 = 'Method1_6'
 tmp1 = SS_output(dir = modelName1)
 sel1 = tmp1$ageselex[tmp1$ageselex$Fleet == 2, ]
 nest1 = tmp1$natage[tmp1$natage$`Beg/Mid` == 'M', ]
@@ -138,7 +138,7 @@ est1 = sweep(nest1sub5, MARGIN = 1, rowSums(nest1sub5), `/`) # est comps
 names(est1) = c('1', '2', '3', '4', '5', '6', '7', '8')
 
 # read the model 2 and check results
-modelName1 = 'StockAssessmentModels/Method2_6'
+modelName1 = 'Method2_6'
 tmp1 = SS_output(dir = modelName1)
 sel1 = tmp1$ageselex[tmp1$ageselex$Fleet == 2, ]
 nest1 = tmp1$natage[tmp1$natage$`Beg/Mid` == 'M', ]
@@ -152,7 +152,7 @@ est2 = sweep(nest1sub5, MARGIN = 1, rowSums(nest1sub5), `/`) # est comps
 names(est2) = c('1', '2', '3', '4', '5', '6', '7', '8')
 
 # read the model 3 and check results
-modelName1 = 'StockAssessmentModels/Method3_6'
+modelName1 = 'Method3_6'
 tmp1 = SS_output(dir = modelName1)
 sel1 = tmp1$ageselex[tmp1$ageselex$Fleet == 2, ]
 nest1 = tmp1$natage[tmp1$natage$`Beg/Mid` == 'M', ]
@@ -166,7 +166,7 @@ est3 = sweep(nest1sub5, MARGIN = 1, rowSums(nest1sub5), `/`) # est comps
 names(est3) = c('1', '2', '3', '4', '5', '6', '7', '8')
 
 # read the model 4 and check results
-modelName1 = 'StockAssessmentModels/Method4_6'
+modelName1 = 'Method4_6'
 tmp1 = SS_output(dir = modelName1)
 sel1 = tmp1$ageselex[tmp1$ageselex$Fleet == 2, ]
 nest1 = tmp1$natage[tmp1$natage$`Beg/Mid` == 'M', ]
@@ -183,6 +183,7 @@ names(est4) = c('1', '2', '3', '4', '5', '6', '7', '8')
 nest1sub6$YEAR = rownames(nest1sub6)
 df0 = melt(nest1sub6, id = c('YEAR'))
 df0$Method = 'SS3Len'
+
 est1$YEAR = rownames(est1)
 df1 = melt(est1, id = c('YEAR'))
 df1$Method = 'SSAge1'
@@ -196,19 +197,19 @@ est4$YEAR = rownames(est4)
 df4 = melt(est4, id = c('YEAR'))
 df4$Method = 'SSAge4'
 
-mergedf = rbind(df0, df1, df2, df3, df4)
+mergedf = rbind(df1, df2, df3, df4)
 colnames(mergedf) = c('YEAR', 'AGE', 'FREQUENCY', 'Method')
 mergedf$AGE = as.numeric(as.character(mergedf$AGE))
 
-bitmap('FinalFigures/compare_estimatedSS3_allMethods3.tiff', height = 190, width = 190, units = 'mm', res = 900)
+bitmap('compare_estimatedSS3_allMethods3.tiff', height = 190, width = 190, units = 'mm', res = 900)
 	print(ggplot(mergedf, aes(x = AGE, y = FREQUENCY)) +
 	  geom_line(aes(linetype = factor(Method), color = factor(Method))) +
 	  facet_wrap( ~ factor(YEAR), nrow = 5) +
 	  xlab('Age') +
 	  ylab('Proportion of abundance') +
 	  scale_x_discrete(limits = 1:8) +
-	  scale_linetype_manual(values=c("twodash", "solid", "solid", "solid", "solid")) + 
-	  scale_color_manual(values=c("black", "#F8766D", "#7CAE00", "#00BFC4", "#C77CFF")) +
+	  scale_linetype_manual(values=c("solid", "solid", "solid", "solid")) + 
+	  scale_color_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF")) +
 	  theme_bw() +
 	  theme(legend.position = c(0.8, 0.08), legend.title = element_blank(), legend.text = element_text(size = 10)))
  dev.off()
@@ -218,7 +219,7 @@ bitmap('FinalFigures/compare_estimatedSS3_allMethods3.tiff', height = 190, width
 # 3) This is the second part of the study case section
 # Compare the model with the current matrix and 
 
-setwd(dir = 'C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+setwd(dir = 'C:/Users/moroncog/Documents/Year1_OSUPhD/Simulations_SAmodels')
 require(r4ss)
 require(reshape2)
 require(ggplot2)
@@ -324,6 +325,22 @@ tmp4$parameters['SR_LN(R0)', 'Parm_StDev']
 
 
 
+tmp0$parameters['NatM_p_1_Fem_GP_1', 'Value']
+tmp1$parameters['NatM_p_1_Fem_GP_1', 'Value']
+tmp2$parameters['NatM_p_1_Fem_GP_1', 'Value']
+tmp3$parameters['NatM_p_1_Fem_GP_1', 'Value']
+tmp4$parameters['NatM_p_1_Fem_GP_1', 'Value']
+
+
+
+tmp0$parameters['NatM_p_1_Fem_GP_1', 'Parm_StDev']
+tmp1$parameters['NatM_p_1_Fem_GP_1', 'Parm_StDev']
+tmp2$parameters['NatM_p_1_Fem_GP_1', 'Parm_StDev']
+tmp3$parameters['NatM_p_1_Fem_GP_1', 'Parm_StDev']
+tmp4$parameters['NatM_p_1_Fem_GP_1', 'Parm_StDev']
+
+
+
 
 tmp1$likelihoods_by_fleet[8, 4]
 tmp2$likelihoods_by_fleet[8, 4]
@@ -332,11 +349,32 @@ tmp4$likelihoods_by_fleet[8, 4]
 
 
 
+mean(tmp0$stdtable[80:123, 'std'])
+mean(tmp1$stdtable[80:123, 'std'])
+mean(tmp2$stdtable[80:123, 'std'])
+mean(tmp3$stdtable[80:123, 'std'])
+mean(tmp4$stdtable[80:123, 'std'])
+
+
+mean(tmp0$stdtable[129:172, 'std'])
+mean(tmp1$stdtable[129:172, 'std'])
+mean(tmp2$stdtable[129:172, 'std'])
+mean(tmp3$stdtable[129:172, 'std'])
+mean(tmp4$stdtable[129:172, 'std'])
+
+
 mean(tmp0$stdtable[80:123, 'std']/tmp0$timeseries$SpawnBio[1:44])
 mean(tmp1$stdtable[80:123, 'std']/tmp1$timeseries$SpawnBio[1:44])
 mean(tmp2$stdtable[80:123, 'std']/tmp2$timeseries$SpawnBio[1:44])
 mean(tmp3$stdtable[80:123, 'std']/tmp3$timeseries$SpawnBio[1:44])
 mean(tmp4$stdtable[80:123, 'std']/tmp4$timeseries$SpawnBio[1:44])
+
+
+mean(tmp0$stdtable[129:172, 'std']/tmp0$timeseries$Recruit_0[1:44])
+mean(tmp1$stdtable[129:172, 'std']/tmp1$timeseries$Recruit_0[1:44])
+mean(tmp2$stdtable[129:172, 'std']/tmp2$timeseries$Recruit_0[1:44])
+mean(tmp3$stdtable[129:172, 'std']/tmp3$timeseries$Recruit_0[1:44])
+mean(tmp4$stdtable[129:172, 'std']/tmp4$timeseries$Recruit_0[1:44])
 
 
 # PLOT FOR SPAWNING DEPLETION
@@ -400,13 +438,12 @@ tdat2 = rbind(tdat0[tdat0$Yr %in% c(1975), ],
 			 tdat3[tdat3$Yr %in% c(1975), ], 
 			 tdat4[tdat4$Yr %in% c(1975), ])
 
-
 xa1 = ggplot(tdat, aes(x = Yr, y = SpawnBio, color = Method)) +
     geom_line() +
-    #geom_line(mapping = aes(y = upper), lty = "dashed") +
-    #geom_line(mapping = aes(y = lower), lty = "dashed") +
+    geom_line(mapping = aes(y = upper), lty = "dashed") +
+    geom_line(mapping = aes(y = lower), lty = "dashed") +
     geom_point(data = tdat2, aes(x = Yr, y = SpawnBio, color = Method)) +
-    #geom_errorbar(data = tdat2, aes(ymin = lower, ymax = upper), width=.35) +
+    geom_errorbar(data = tdat2, aes(ymin = lower, ymax = upper), width=.35) +
     scale_color_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF",'black')) +
 	xlab('') +
 	ylab(bquote('Spawning depletion')) +
@@ -414,6 +451,22 @@ xa1 = ggplot(tdat, aes(x = Yr, y = SpawnBio, color = Method)) +
     theme_bw() +
     theme(legend.position = c(0.7, 0.72), legend.title = element_blank(), legend.text = element_text(size = 7))
 
+xa2 = ggplot(tdat, aes(x = Yr)) +
+    geom_ribbon(aes(ymin = lower, ymax=upper, fill = Method), alpha=0.2) +
+    geom_line(aes(y = SpawnBio, color = Method)) +
+    #geom_line(mapping = aes(y = upper), lty = "dashed") +
+    #geom_line(mapping = aes(y = lower), lty = "dashed") +
+    geom_point(data = tdat2, aes(x = Yr, y = SpawnBio, color = Method)) +
+    geom_errorbar(data = tdat2, aes(ymin = lower, ymax = upper, color = Method), width=.35) +
+    scale_fill_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", "grey70"), name = 'fill') +
+    scale_color_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", 'black')) +
+	xlab('') +
+	ylab(bquote('Spawning depletion')) +
+	xlim(1974, 2019) +
+    theme_bw() +
+    theme(legend.position = c(0.7, 0.72), legend.title = element_blank(), legend.text = element_text(size = 7), 
+    	legend.key.size = unit(0.4, "cm")) +
+    guides(fill = FALSE)
 
 
 # PLOT FOR RECRUITMENT
@@ -473,12 +526,27 @@ tdat4 = rbind(tdat0r[tdat0r$Yr %in% c(1975), ],
 			 tdat4r[tdat4r$Yr %in% c(1975), ])
 
 
-xa2 = ggplot(tdat3, aes(x = Yr, y = Recruit_0, color = Method)) +
+xa3 = ggplot(tdat3, aes(x = Yr, y = Recruit_0, color = Method)) +
     geom_line() +
+    geom_line(mapping = aes(y = upper), lty = "dashed") +
+    geom_line(mapping = aes(y = lower), lty = "dashed") +
+    geom_point(data = tdat4, aes(x = Yr, y = Recruit_0, color = Method)) +
+    geom_errorbar(data = tdat4, aes(ymin = lower, ymax = upper), width=.35) +
+    scale_color_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", 'black')) +
+	xlab('Year') +
+	ylab(bquote('Age-0 recruits ('*10^9~ind*')')) +
+	xlim(1974, 2019) +
+    theme_bw() +
+    theme(legend.position = 'none')
+
+xa4 = ggplot(tdat3, aes(x = Yr)) +
+    geom_ribbon(aes(ymin = lower, ymax=upper, fill = Method), alpha=0.2) +
+    geom_line(aes(y = Recruit_0, color = Method)) +
     #geom_line(mapping = aes(y = upper), lty = "dashed") +
     #geom_line(mapping = aes(y = lower), lty = "dashed") +
     geom_point(data = tdat4, aes(x = Yr, y = Recruit_0, color = Method)) +
-    #geom_errorbar(data = tdat4, aes(ymin = lower, ymax = upper), width=.35) +
+    geom_errorbar(data = tdat4, aes(ymin = lower, ymax = upper, color = Method), width=.35) +
+    scale_fill_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", "grey70"), name = 'fill') +
     scale_color_manual(values=c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF", 'black')) +
 	xlab('Year') +
 	ylab(bquote('Age-0 recruits ('*10^9~ind*')')) +
@@ -487,9 +555,17 @@ xa2 = ggplot(tdat3, aes(x = Yr, y = Recruit_0, color = Method)) +
     theme(legend.position = 'none')
 
 
-bitmap('FinalFigures/compare_SSBRec_allMethods.tiff', height = 120, width = 110, units = 'mm', res = 800)
 
-	grid.arrange(xa1, xa2, nrow = 2)
+
+bitmap('FinalFigures/compare_SSBRec_allMethods2.tiff', height = 120, width = 110, units = 'mm', res = 500)
+
+	grid.arrange(xa1, xa3, nrow = 2)
+
+dev.off()
+
+png('FinalFigures/compare_SSBRec_allMethods3.png', height = 120, width = 110, units = 'mm', res = 500)
+
+	grid.arrange(xa2, xa4, nrow = 2)
 
 dev.off()
 

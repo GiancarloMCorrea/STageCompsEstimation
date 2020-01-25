@@ -3,6 +3,8 @@ require(ggplot2)
 library(mapdata)
 require(BBmisc)
 library(gridExtra)
+require(grid)
+require(gtable)
 
 setwd(dir = 'C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 
@@ -145,7 +147,7 @@ ap1 = ggplot(dat1) +
 	geom_density(aes(x = cohort1), fill = "gray") +
 	theme_bw() +
 	xlab('') +
-	ylab('No S scenario') +
+	ylab('') +
 	xlim(30, 47.5) +
 	theme(axis.text.y=element_blank(),
         axis.ticks.y=element_blank()) 
@@ -157,8 +159,9 @@ ap2 = ggplot(dat1) +
 	xlab('') +
 	ylab('') +
 	xlim(30, 47.5) +
+	ggtitle("No S scenario") +
 	theme(axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+        axis.ticks.y=element_blank(), plot.title = element_text(hjust = 0.5))
 
 # S scenario:
 simu1 = rnorm(100000, mean = 40, sd = 1.2)
@@ -172,8 +175,8 @@ dat4 = data.frame(cohort1 = c(simu1, simu2, simu3))
 ap3 = ggplot(dat4) + 
 	geom_density(aes(x = cohort1), fill = "gray") +
 	theme_bw() +
-	xlab('Length (cm)') +
-	ylab('S scenario') +
+	xlab('') +
+	ylab('') +
 	xlim(30, 47.5) +
 	theme(axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
@@ -186,15 +189,16 @@ ap4 = ggplot(dat1) +
 		geom_text(x = 33, y = 0.33, label="Slow growth", color = 'blue', size = 2.6) +
 		geom_text(x = 33, y = 0.27, label="Fast growth", color = 'red', size = 2.6) +
 	theme_bw() +
-	xlab('Length (cm)') +
+	xlab('') +
 	ylab('') +
 	xlim(30, 47.5) +
+	ggtitle("S scenario") +
 	theme(axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+        axis.ticks.y=element_blank(), plot.title = element_text(hjust = 0.5))
 
 
 bitmap('FinalFigures/auxPlotGrowthSpatial.tiff', height = 120, width = 120, units = 'mm', res = 600)
 	
-	grid.arrange(ap1, ap2, ap3, ap4, nrow = 2)
+	grid.arrange(ap2, ap4, ap1, ap3, nrow = 2, bottom=textGrob("Length (cm)", gp=gpar(fontsize=10)))
 			
 dev.off()

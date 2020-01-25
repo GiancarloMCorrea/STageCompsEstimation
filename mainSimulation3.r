@@ -140,6 +140,7 @@ for(k in seq_along(allYears)){
 							   START_LATITUDE = sampleStations$lat[sampleStations$sampledGrids == j], 
 								STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
 								STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
+								STRATUM3 = sampleStations$stratum3[sampleStations$sampledGrids == j],
 								TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
 								NUMBER_FISH = nFishSampled)
 		allcatchData = rbind(allcatchData, catchData)
@@ -155,6 +156,7 @@ for(k in seq_along(allYears)){
 									   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
 										STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
 										STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
+										STRATUM3 = sampleStations$stratum3[sampleStations$sampledGrids == j],
 										TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
 										LENGTH = allLens[posLenSam], FREQUENCY = nFishLenSampled2[posLenSam])
 				alllenData = rbind(alllenData, lenData)
@@ -171,6 +173,7 @@ for(k in seq_along(allYears)){
 									   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
 										STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
 										STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
+										STRATUM3 = sampleStations$stratum3[sampleStations$sampledGrids == j],
 										TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
 										LENGTH = allLens[posLenSam], FREQUENCY = nFishLenSampled2[posLenSam])
 				alllenData = rbind(alllenData, lenData)
@@ -203,6 +206,7 @@ for(k in seq_along(allYears)){
 									   LAT = sampleStations$lat[sampleStations$sampledGrids == j], 
 										STRATUM_ALT = sampleStations$stratum[sampleStations$sampledGrids == j],
 										STRATUM = sampleStations$stratum2[sampleStations$sampledGrids == j],
+										STRATUM3 = sampleStations$stratum3[sampleStations$sampledGrids == j],
 										TYPEGRID = sampleStations$typegrid[sampleStations$sampledGrids == j],
 										LENGTH = lensSam, AGE = agesSam)
 						allageData = rbind(allageData, ageData)
@@ -295,6 +299,25 @@ if(ix == 1){
 	bitmap(paste0('surveyDescription3R_', scenarioName, '.tiff'), height = 110, width = 90, units = 'mm', res = 500)
 	
 	grid.arrange(ax2, ax1, nrow = 2)
+			
+	dev.off()  
+}
+
+
+if(ix == 1){
+
+	ax3 = map.heatmap2(lat = yy2@coords[,2], lon = yy2@coords[,1], data = yy2@data, data2 = lenStations,
+              color_low = "blue", color_high = "red", zeroiswhite = TRUE, xlim = c(-179,-158), ylim = c(53.5,63), pSize = 0.65) +
+			  geom_polygon(data = ak, aes(long, lat, group = group), 
+			  fill = 8, color="black") +
+			  xlab('longitude') +
+			  ylab('latitude') +
+			  theme(legend.position = c(0.5, 1.18), plot.margin = unit(c(0,0,0,0),"cm"), legend.key.width = unit(0.75, "cm"), 
+			  	legend.text=element_text(size=7.5))
+
+	bitmap(paste0('surveyDescription4R_', scenarioName, '.tiff'), height = 55, width = 90, units = 'mm', res = 500)
+	
+	print(ax3)
 			
 	dev.off()  
 }

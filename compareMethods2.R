@@ -298,6 +298,105 @@ met4df$METHOD = 'Method4'
 allMethodsPropYear = rbind(allMethodsPropYear, met4df)
 
 #  ------------------------------------------------------------------------
+#  ------------------------------------------------------------------------
+
+# Method 5: GLM: age ~ length
+
+# continue script:
+mydataglm = data4
+
+# start loop over years
+yearsfac = sort(unique(mydataglm$YEAR))
+#saveModInd = NULL
+dwriteAll = NULL
+for(j in seq_along(yearsfac)){
+  
+  subdata = mydataglm[mydataglm$YEAR == yearsfac[j], ]
+  data3tmp = data3[data3$YEAR == yearsfac[j], ]
+  
+  # run the model GAM:
+  age_glm = glm(AGE ~ LENGTH, data=subdata, family = Gamma)
+
+
+  # predict data
+  data3tmp$AGE = as.vector(predict(age_glm,newdata=data3tmp,type='response'))
+
+  #Round ages (makes sense?): 
+  data3tmp$AGEROUND = round(data3tmp$AGE,0)
+  data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
+	
+  dwriteAll = rbind(dwriteAll, data3tmp)
+  
+}
+
+dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
+#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
+catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
+dwriteAll2$x = dwriteAll2$x/catchinorder
+met5df = dwriteAll2 
+
+names(met5df) = c('YEAR', 'AGE', 'FREQUENCY')
+
+met5df$METHOD = 'Method5'
+
+# Save data frame:
+allMethodsPropYear = rbind(allMethodsPropYear, met5df)
+
+
+#  ------------------------------------------------------------------------
+#  ------------------------------------------------------------------------
+
+# Method 6: GLM: age ~ length + STRATUM
+
+# continue script:
+mydataglm = data4
+
+# start loop over years
+yearsfac = sort(unique(mydataglm$YEAR))
+#saveModInd = NULL
+dwriteAll = NULL
+for(j in seq_along(yearsfac)){
+  
+  subdata = mydataglm[mydataglm$YEAR == yearsfac[j], ]
+  data3tmp = data3[data3$YEAR == yearsfac[j], ]
+  
+  # run the model GAM:
+  age_glm = glm(AGE ~ LENGTH + STRATUM3, data=subdata, family = Gamma)
+
+
+  # predict data
+  data3tmp$AGE = as.vector(predict(age_glm,newdata=data3tmp,type='response'))
+
+  #Round ages (makes sense?): 
+  data3tmp$AGEROUND = round(data3tmp$AGE,0)
+  data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
+	
+  dwriteAll = rbind(dwriteAll, data3tmp)
+  
+}
+
+dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
+#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
+catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
+dwriteAll2$x = dwriteAll2$x/catchinorder
+met6df = dwriteAll2 
+
+names(met6df) = c('YEAR', 'AGE', 'FREQUENCY')
+
+met6df$METHOD = 'Method6'
+
+# Save data frame:
+allMethodsPropYear = rbind(allMethodsPropYear, met6df)
+
+
+
+
+# END OF ALL METHODS
+
+#  ------------------------------------------------------------------------
+#  ------------------------------------------------------------------------
 # SAVE FILE:
 
 allMethodsPropYear$replicate = ix # add replicate column
