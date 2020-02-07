@@ -1,9 +1,9 @@
 #  ------------------------------------------------------------------------
 # Read again data:
 
-# data2 = read.csv("simData/paccod_catch_Sim.csv")
-# data3 = read.csv("simData/paccod_len_Sim.csv")
-# data4 = read.csv("simData/paccod_age_Sim.csv")
+# data2 = read.csv("simData/paccod_catch_Sim_NoS_NoT.csv")
+# data3 = read.csv("simData/paccod_len_Sim_NoS_NoT.csv")
+# data4 = read.csv("simData/paccod_age_Sim_NoS_NoT.csv")
 # outdat2 = read.csv('simData/abunlen_stratum2Sim.csv')
 # NAgeYearMatrix = read.csv('simData/NAgeYearMat.csv')
 
@@ -300,95 +300,95 @@ allMethodsPropYear = rbind(allMethodsPropYear, met4df)
 #  ------------------------------------------------------------------------
 #  ------------------------------------------------------------------------
 
-# Method 5: GLM: age ~ length
+# # Method 5: GLM: age ~ length
 
-# continue script:
-mydataglm = data4
+# # continue script:
+# mydataglm = data4
 
-# start loop over years
-yearsfac = sort(unique(mydataglm$YEAR))
-#saveModInd = NULL
-dwriteAll = NULL
-for(j in seq_along(yearsfac)){
+# # start loop over years
+# yearsfac = sort(unique(mydataglm$YEAR))
+# #saveModInd = NULL
+# dwriteAll = NULL
+# for(j in seq_along(yearsfac)){
   
-  subdata = mydataglm[mydataglm$YEAR == yearsfac[j], ]
-  data3tmp = data3[data3$YEAR == yearsfac[j], ]
+#   subdata = mydataglm[mydataglm$YEAR == yearsfac[j], ]
+#   data3tmp = data3[data3$YEAR == yearsfac[j], ]
   
-  # run the model GAM:
-  age_glm = glm(AGE ~ LENGTH, data=subdata, family = poisson)
+#   # run the model GAM:
+#   age_glm = glm(AGE ~ LENGTH, data=subdata, family = poisson)
 
 
-  # predict data
-  data3tmp$AGE = as.vector(predict(age_glm,newdata=data3tmp,type='response'))
+#   # predict data
+#   data3tmp$AGE = as.vector(predict(age_glm,newdata=data3tmp,type='response'))
 
-  #Round ages (makes sense?): 
-  data3tmp$AGEROUND = round(data3tmp$AGE,0)
-  data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
+#   #Round ages (makes sense?): 
+#   data3tmp$AGEROUND = round(data3tmp$AGE,0)
+#   data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
 	
-  dwriteAll = rbind(dwriteAll, data3tmp)
+#   dwriteAll = rbind(dwriteAll, data3tmp)
   
-}
+# }
 
-dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
-#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
-catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
-catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
-dwriteAll2$x = dwriteAll2$x/catchinorder
-met5df = dwriteAll2 
+# dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
+# #catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+# catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
+# catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
+# dwriteAll2$x = dwriteAll2$x/catchinorder
+# met5df = dwriteAll2 
 
-names(met5df) = c('YEAR', 'AGE', 'FREQUENCY')
+# names(met5df) = c('YEAR', 'AGE', 'FREQUENCY')
 
-met5df$METHOD = 'Method5'
+# met5df$METHOD = 'Method5'
 
-# Save data frame:
-allMethodsPropYear = rbind(allMethodsPropYear, met5df)
+# # Save data frame:
+# allMethodsPropYear = rbind(allMethodsPropYear, met5df)
 
 
-#  ------------------------------------------------------------------------
-#  ------------------------------------------------------------------------
+# #  ------------------------------------------------------------------------
+# #  ------------------------------------------------------------------------
 
-# Method 6: GLM: age ~ length + STRATUM
+# # Method 6: GLM: age ~ length + STRATUM
 
-# continue script:
-mydataglm = data4
+# # continue script:
+# mydataglm = data4
 
-# start loop over years
-yearsfac = sort(unique(mydataglm$YEAR))
-#saveModInd = NULL
-dwriteAll = NULL
-for(j in seq_along(yearsfac)){
+# # start loop over years
+# yearsfac = sort(unique(mydataglm$YEAR))
+# #saveModInd = NULL
+# dwriteAll = NULL
+# for(j in seq_along(yearsfac)){
   
-  subdata = mydataglm[mydataglm$YEAR == yearsfac[j], ]
-  data3tmp = data3[data3$YEAR == yearsfac[j], ]
+#   subdata = mydataglm[mydataglm$YEAR == yearsfac[j], ]
+#   data3tmp = data3[data3$YEAR == yearsfac[j], ]
   
-  # run the model GAM:
-  age_glm = glm(AGE ~ LENGTH + STRATUM3, data=subdata, family = poisson)
+#   # run the model GAM:
+#   age_glm = glm(AGE ~ STRATUM3 + STRATUM3*LENGTH, data=subdata, family = poisson)
 
 
-  # predict data
-  data3tmp$AGE = as.vector(predict(age_glm,newdata=data3tmp,type='response'))
+#   # predict data
+#   data3tmp$AGE = as.vector(predict(age_glm,newdata=data3tmp,type='response'))
 
-  #Round ages (makes sense?): 
-  data3tmp$AGEROUND = round(data3tmp$AGE,0)
-  data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
+#   #Round ages (makes sense?): 
+#   data3tmp$AGEROUND = round(data3tmp$AGE,0)
+#   data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
 	
-  dwriteAll = rbind(dwriteAll, data3tmp)
+#   dwriteAll = rbind(dwriteAll, data3tmp)
   
-}
+# }
 
-dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
-#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
-catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
-catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
-dwriteAll2$x = dwriteAll2$x/catchinorder
-met6df = dwriteAll2 
+# dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
+# #catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+# catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
+# catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
+# dwriteAll2$x = dwriteAll2$x/catchinorder
+# met6df = dwriteAll2 
 
-names(met6df) = c('YEAR', 'AGE', 'FREQUENCY')
+# names(met6df) = c('YEAR', 'AGE', 'FREQUENCY')
 
-met6df$METHOD = 'Method6'
+# met6df$METHOD = 'Method6'
 
-# Save data frame:
-allMethodsPropYear = rbind(allMethodsPropYear, met6df)
+# # Save data frame:
+# allMethodsPropYear = rbind(allMethodsPropYear, met6df)
 
 
 

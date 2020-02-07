@@ -219,6 +219,9 @@ bitmap('compare_estimatedSS3_allMethods3.tiff', height = 190, width = 190, units
 # 3) This is the second part of the study case section
 # Compare the model with the current matrix and 
 
+ ###################### WATCH OUTTTTTTTTTTTTTTTTTT!!!!!!!!!!!!!!!!!
+ # FINAL RESULTS ARE IN OTHER FOLDER 
+
 setwd(dir = 'C:/Users/moroncog/Documents/Year1_OSUPhD/Simulations_SAmodels')
 require(r4ss)
 require(reshape2)
