@@ -4,9 +4,12 @@ require(gridExtra)
 require(scales)
 require(grid)
 
-#setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+allMethodsMREtot = NULL
+allMethodsMSEtot = NULL
+
+setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 # These two values should be the same as in paramtersSimulation:
-scenarioName = 'HighS_HighT'
+scenarioName = 'NoS_NoT'
 agePlus = 8
 
 # New parameters
@@ -32,9 +35,72 @@ allMethodsPropYear4 = aggregate(allMethodsPropYear3$MRE*100, list(YEAR = allMeth
 
 allMethodsMRE = aggregate(allMethodsPropYear3$MRE*100, list(METHOD = allMethodsPropYear3$METHOD), mean)
 allMethodsMSE = aggregate(allMethodsPropYear3$MSE*10^5, list(METHOD = allMethodsPropYear3$METHOD), mean)
+allMethodsMRE$SCENARIO = 'No S / No T'
+allMethodsMSE$SCENARIO = 'No S / No T'
+
+allMethodsMSEtot = rbind(allMethodsMSEtot, allMethodsMSE)
+allMethodsMREtot = rbind(allMethodsMREtot, allMethodsMRE)
 
 #write.csv(allMethodsMRE, paste0('MRE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
 #write.csv(allMethodsMSE, paste0('MSE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
+
+
+all1 = ggplot(data = allMethodsMSEtot, aes(x=as.factor(SCENARIO), y=x, fill=as.factor(METHOD))) +
+				geom_bar(stat="identity", color="black", position=position_dodge(), width = 0.7)+
+			#	geom_errorbar(aes(ymin = x-sd, ymax = x+sd), width=.2,
+			#                 position=position_dodge(.9)) +
+				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "year ALK", "GAM", 'CRL')) +
+			  	ylab(bquote(MSE ~ ' (10'^'-5'~')')) +
+				xlab('') +
+				scale_y_continuous(limits=c(max(min(allMethodsMSEtot$x), -10), min(max(allMethodsMSEtot$x), 10)),oob = rescale_none) +
+				theme_bw() +
+				theme(legend.position = c(0.2, 0.75), axis.text=element_text(size=12), legend.background = element_rect(fill = "transparent"))
+
+all2 = ggplot(data = allMethodsMREtot, aes(x=as.factor(SCENARIO), y=x, fill=as.factor(METHOD))) +
+				geom_bar(stat="identity", color="black", position=position_dodge(), width = 0.7)+
+			#	geom_errorbar(aes(ymin = x-sd, ymax = x+sd), width=.2,
+			#                 position=position_dodge(.9)) +
+				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '') +
+			  	ylab('MRE (%)') +
+				xlab('') +
+				scale_y_continuous(limits=c(max(min(allMethodsMREtot$x), -10), min(max(allMethodsMREtot$x), 10)),oob = rescale_none) +
+				theme_bw() +
+				theme(legend.position='none', axis.text=element_text(size=12))
+
+
+# Plot MSE and MRE per age:
+png('FinalFigures/MSE_MRE_TOTAL.png', height = 90, width = 180, units = 'mm', res = 700)
+
+	grid.arrange(all1, all2, nrow = 1)
+
+dev.off()
+
+
+# ------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
+# START AGAIN:
+setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+# These two vales should be the same as in paramtersSimulation:
+scenarioName = 'NoS_NoT'
+agePlus = 8
+
+# New parameters
+selFolder2 = 'simPerInd2'
+
+# For second figure
+allFiles2 = list.files(path = selFolder2)
+allFiles22 = allFiles2[grep(pattern = scenarioName, x = allFiles2)]
+
+#  ------------------------------------------------------------------------
+# Plot all methods: Figure 3
+allMethodsPropYear3 = NULL
+for(k in seq_along(allFiles22)){
+	tmp = read.csv(file.path(selFolder2, allFiles22[k]))
+	allMethodsPropYear3 = rbind(allMethodsPropYear3, tmp)
+}
+
+allMethodsPropYear4 = aggregate(allMethodsPropYear3$MRE*100, list(YEAR = allMethodsPropYear3$YEAR, 
+								AGE = allMethodsPropYear3$AGE, METHOD = allMethodsPropYear3$METHOD), mean)
 
 
 #  ------------------------------------------------------------------------
@@ -158,15 +224,16 @@ MSEdf$x = MSEdf$x*10^5
 
 mseage = 	ggplot(data=MSEdf, aes(x=as.factor(AGE), y=x, fill=as.factor(METHOD))) +
 				geom_bar(stat="identity", color="black", position=position_dodge(), width = 0.7)+
-				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '') +
+				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "year ALK", "GAM", 'CRL')) +
 			  	ylab(bquote(MSE['age'] ~ ' (10'^'-5'~')')) +
 				xlab('') +
 				scale_y_continuous(limits=c(0, min(max(MSEdf$x), 10)),oob = rescale_none) +
 				theme_bw() +
 				ggtitle("No S / No T") +
-				theme(legend.position = 'none', plot.title = element_text(hjust = 0.5), legend.text=element_text(size=7.5))
+				theme(legend.position = 'none', plot.title = element_text(hjust = 0.5), legend.text=element_text(size=7.5),
+					legend.key.size = unit(0.35, "cm"))
 
-if(scenarioName == 'NoS_NoT') mseage = mseage + theme(legend.position=c(0.8, 0.73))
+if(scenarioName == 'NoS_NoT') mseage = mseage + theme(legend.position=c(0.8, 0.8), legend.background = element_rect(fill = "transparent"))
 
 
 if(max(MSEdf$x) > 10) {
@@ -337,12 +404,17 @@ allMethodsPropYear6x = aggregate(allMethodsPropYear6$x, list(METHOD = allMethods
 
 mreyear2 = 	ggplot(data = allMethodsPropYear6x, aes(y = x, x = factor(PERIOD), fill = factor(METHOD))) +
 		geom_bar(stat="identity", color="black", position='dodge', width = 0.7)+
-		scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '') +
+		scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "year ALK", "GAM", 'CRL')) +
 	  	ylab('') +
 		xlab('') +
 		scale_y_continuous(limits=c(max(min(allMethodsPropYear6$x), -10), min(max(allMethodsPropYear6$x), 10)),oob = rescale_none) +
 		theme_bw() +
-		theme(legend.position='none') 
+		theme(legend.position='none', plot.title = element_text(hjust = 0.5), legend.text=element_text(size=7.5),
+					legend.key.size = unit(0.35, "cm")) 
+
+
+if(scenarioName == 'HighS_HighT') mreyear2 = mreyear2 + theme(legend.position=c(0.2, 0.9), legend.background = element_rect(fill = "transparent"))
+
 
 if(max(allMethodsPropYear6x$x) > 10 | min(allMethodsPropYear6x$x) < -10) {
 
@@ -516,3 +588,16 @@ dev.off()
 
 # -----------------------------------------------------------------------------
 
+# Plot MSE and MRE per age:
+png('FinalFigures/MSE_MRE_age2_total.png', height = 120, width = 180, units = 'mm', res = 700)
+
+	grid.arrange(mseage, mseage2, mreage, mreage2, nrow = 2, bottom=textGrob("Age", gp=gpar(fontsize=10)))
+
+dev.off()
+
+# Plot MSE and MRE per year:
+png('FinalFigures/MSE_MRE_year2_total.png', height = 120, width = 180, units = 'mm', res = 700)
+
+	grid.arrange(mseyear, mseyear2, mreyear, mreyear2, nrow = 2)
+
+dev.off()

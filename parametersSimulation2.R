@@ -1,13 +1,13 @@
 
 # New Parameters:
 
-setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+#setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 
 	# define if simulation is run. if simulation is FALSE, all plots will be created.
 	simulation = TRUE
 	# Scenario name:
-	scenario1 = 'HighS'
-	scenario2 = 'HighT'
+	scenario1 = 'NoS'
+	scenario2 = 'NoT'
 	scenarioName = paste0(scenario1, '_', scenario2)
 
 # Scenarios definitions:
@@ -45,11 +45,14 @@ GridArea = dsGrid*dsGrid*3.43
 # R0inidengrid = R0inidenkm2*dsGrid*dsGrid*3.43 # abundance per grid.
 
 # These parameters will be used later:
-iniYear = 1985
-iniYearSam = 1994
-endYear = 2016
+iniYear = 1977
+iniYear0 = iniYear-1 # This will be initial year in stock synthesis
+iniYear2 = iniYear
+iniYearSam = 1982
+endYear = 2018
 maxAge = 20
 minAge = 0
+maxAgePopMod = 3*maxAge # only to calculate inital population
 minEstAge = 1
 maxLen = 120
 minLen = 1
@@ -65,9 +68,9 @@ NuMat = 1 # st value = 1
 maxNSamAge = 4 # number of ind sampled in station j for age (random sampling)
 #maxNSamPerAge = 120 # max number of ind sampled for age in length bin l in the survey. THIS SHOULD NOT BE A RESTRICTION ? (random sampling)
 #maxNSamAgeStation = 3 # max number of ind of length bin l sampled in station j for age (random sampling)
-t1 = 0.3 # first dt for natural and fishing mortality
+t1 = 0.5 # first dt for natural and fishing mortality
 Linf = 118.6 # L2 in SS
-K_par = 0.1376 # 0.195 is the value in SS. seems to be very high.
+K_par = 0.14 # 0.195 is the value in SS. seems to be very high.
 M_par = 0.34
 
 # I consider that the best way to control the spatiotemporal variability in growth and spawning time on size-at-age CV is 
@@ -75,14 +78,18 @@ M_par = 0.34
 CV1 = 0.8 # this is a sd. 3.45 is the value in SS
 CV2 = 3 # this is a sd. 9.586 is the value in SS
 
+if(scenarioName == 'NoS_NoT'){
+	CV1 = 3.45 # this is a sd. 3.45 is the value in SS
+	CV2 = 9.586 # this is a sd. 9.586 is the value in SS
+} 
+
 L1_par = 10 # same as SS. L1
 A1_par = 0.5 # same as SS. a3
-A2_par = 18.5 # a4 in SS
+A2_par = 20 # a4 in SS
 t0 = -0.168
-F_par = 0.46 # SS results. Apical F
+F_par = 0.35 # SS results. Apical F
 areaSwept = 0.05 # km2. average of all data: 1994 - 2016. a
 nSamLoc = round(nrow(sampleStations)*0.95) # number of age sample locations. 95% all locations = 332 so far
-sigmaR = 0.66# for recruitment
 sigmaM = 0.7 # for simulated catches
 lenCatchTh = 200 #th in length sample
 SelecFish = c(0, 0.000231637, 0.00279779, 0.0328583, 0.29149, 0.832831, 0.983694, 0.998633, 0.999887, 
@@ -90,11 +97,40 @@ SelecFish = c(0, 0.000231637, 0.00279779, 0.0328583, 0.29149, 0.832831, 0.983694
 SelecSurv = c(0, 1, 1, 1, 1, 1, 1, 1, 1, 
               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)# SURVEY. from age 0 to 20. be sure it has same length as allAges
 
+# Recruitment parameters:
+y_1 = 1964.6
+y_2 = 1981.5
+y_3 = 2015.9
+y_4 = 2023
+bmax = 0.9873
+steep = 0.99
+sigmaR = 0.65# for recruitment
+R0 = exp(12.984)*1e03
+
+
+# wt at length relationship
+wt_a = 5.58883e-006
+wt_b = 3.18851
+
+# Maturity:
+Om_4 = 4.8832
+Om_3 = -0.9654
+
+# Eggs:
+Om_5 = 1
+Om_6 = 0
+
+fracFem = 0.5
+
 # Derived quantities:
 allAges = seq(from = minAge, to = maxAge, by = dT)
-allYears = seq(from = iniYear, to = endYear, by = dT)
+allYears = seq(from = iniYear0, to = endYear, by = dT)
 allYearsSam = seq(from = iniYearSam, to = endYear, by = dT)
 allLens = seq(from = minLen, to = maxLen, by = lenBin)
+allWts = wt_a*(allLens+lenBin*0.5)^wt_b
+allMats = 1/(1 + exp(Om_3*((allAges+lenBin*0.5) - Om_4)))
+allEggs = Om_5 + allWts*Om_6
+Part2Fec = allWts*allEggs
 
 # --------------------------------------------------------------
 # Parameters for the estimation part
