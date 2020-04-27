@@ -29,19 +29,26 @@ ix = 1
 
 	# parameters for the simulation and estimation step:
 	#source('parametersSimulation.R')
-	source('parametersSimulation.R')
+	source('parametersSimulation2.R')
 
-	# Calculate SB_0 (only for SS3 like)
-	#source('initialConditions.R')
+	# Calculate SB_0
+	source('initialConditions.R')
 
 	# simulate Random Fields for recruitment
 	source('simulateRandomFields.R')
 
 	# main code for simulation (population and sampling):
-	source('mainSimulation3.R') # mainSimulation3 is normal method, mainSimulation4 is SS3 like
+	source('mainSimulation4.R') # simulation1 is length stratified. simulation2 is random sampling
 
 	# estimates from the sampling output (e.g. total abundance, len abundance):
 	source('estimatesSimulation2.R')
 
 	# Final Step (?): compare age props between different methods
-	source('compareMethods2.R')
+	#source('compareMethods2.R')
+	source('studyCase_NoStrata_Simulated.R')
+
+	# Get data base for SA models
+	source('order_Data_to_SA.R')
+
+	# Compare SA results with real population
+	source('SA_simulated.R')

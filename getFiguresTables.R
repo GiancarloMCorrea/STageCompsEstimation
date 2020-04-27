@@ -7,8 +7,11 @@ require(grid)
 allMethodsMREtot = NULL
 allMethodsMSEtot = NULL
 
+#START HERE
+
 setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 # These two values should be the same as in paramtersSimulation:
+#scenarioName = 'HighS_HighT'
 scenarioName = 'NoS_NoT'
 agePlus = 8
 
@@ -37,9 +40,12 @@ allMethodsMRE = aggregate(allMethodsPropYear3$MRE*100, list(METHOD = allMethodsP
 allMethodsMSE = aggregate(allMethodsPropYear3$MSE*10^5, list(METHOD = allMethodsPropYear3$METHOD), mean)
 allMethodsMRE$SCENARIO = 'No S / No T'
 allMethodsMSE$SCENARIO = 'No S / No T'
+#allMethodsMRE$SCENARIO = 'S / T'
+#allMethodsMSE$SCENARIO = 'S / T'
 
 allMethodsMSEtot = rbind(allMethodsMSEtot, allMethodsMSE)
 allMethodsMREtot = rbind(allMethodsMREtot, allMethodsMRE)
+# stop here and run for the other scenario
 
 #write.csv(allMethodsMRE, paste0('MRE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
 #write.csv(allMethodsMSE, paste0('MSE_allComparison_', scenarioName, '.csv'), row.names = FALSE)
@@ -49,7 +55,7 @@ all1 = ggplot(data = allMethodsMSEtot, aes(x=as.factor(SCENARIO), y=x, fill=as.f
 				geom_bar(stat="identity", color="black", position=position_dodge(), width = 0.7)+
 			#	geom_errorbar(aes(ymin = x-sd, ymax = x+sd), width=.2,
 			#                 position=position_dodge(.9)) +
-				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "year ALK", "GAM", 'CRL')) +
+				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "annual ALK", "GAM", 'CRL')) +
 			  	ylab(bquote(MSE ~ ' (10'^'-5'~')')) +
 				xlab('') +
 				scale_y_continuous(limits=c(max(min(allMethodsMSEtot$x), -10), min(max(allMethodsMSEtot$x), 10)),oob = rescale_none) +
@@ -224,7 +230,7 @@ MSEdf$x = MSEdf$x*10^5
 
 mseage = 	ggplot(data=MSEdf, aes(x=as.factor(AGE), y=x, fill=as.factor(METHOD))) +
 				geom_bar(stat="identity", color="black", position=position_dodge(), width = 0.7)+
-				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "year ALK", "GAM", 'CRL')) +
+				scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "annual ALK", "GAM", 'CRL')) +
 			  	ylab(bquote(MSE['age'] ~ ' (10'^'-5'~')')) +
 				xlab('') +
 				scale_y_continuous(limits=c(0, min(max(MSEdf$x), 10)),oob = rescale_none) +
@@ -404,7 +410,7 @@ allMethodsPropYear6x = aggregate(allMethodsPropYear6$x, list(METHOD = allMethods
 
 mreyear2 = 	ggplot(data = allMethodsPropYear6x, aes(y = x, x = factor(PERIOD), fill = factor(METHOD))) +
 		geom_bar(stat="identity", color="black", position='dodge', width = 0.7)+
-		scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "year ALK", "GAM", 'CRL')) +
+		scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", '#C77CFF'), name = '', labels = c("pooled ALK", "annual ALK", "GAM", 'CRL')) +
 	  	ylab('') +
 		xlab('') +
 		scale_y_continuous(limits=c(max(min(allMethodsPropYear6$x), -10), min(max(allMethodsPropYear6$x), 10)),oob = rescale_none) +

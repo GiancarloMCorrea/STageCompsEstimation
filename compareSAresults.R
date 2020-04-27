@@ -50,16 +50,16 @@ df0 = melt(nest1sub6, id = c('YEAR'))
 df0$Method = 'SSLen'
 est1$YEAR = rownames(est1)
 df1 = melt(est1, id = c('YEAR'))
-df1$Method = 'Method1'
+df1$Method = 'pooled ALK'
 est2$YEAR = rownames(est2)
 df2 = melt(est2, id = c('YEAR'))
-df2$Method = 'Method2'
+df2$Method = 'annual ALK'
 est3$YEAR = rownames(est3)
 df3 = melt(est3, id = c('YEAR'))
-df3$Method = 'Method3'
+df3$Method = 'GAM'
 est4$YEAR = rownames(est4)
 df4 = melt(est4, id = c('YEAR'))
-df4$Method = 'Method4'
+df4$Method = 'CRL'
 
 mergedf = rbind(df0, df1, df2, df3, df4)
 colnames(mergedf) = c('YEAR', 'AGE', 'FREQUENCY', 'Method')
@@ -81,6 +81,7 @@ bitmap('FinalFigures/compare_estimatedSS3_allMethods.tiff', height = 190, width 
 mergedf = rbind(df1, df2, df3, df4)
 colnames(mergedf) = c('YEAR', 'AGE', 'FREQUENCY', 'Method')
 mergedf$AGE = as.numeric(as.character(mergedf$AGE))
+mergedf$Method = factor(mergedf$Method, levels = c('pooled ALK', 'annual ALK', 'GAM', 'CRL')) # THESE ARE TRUE VALUES
 
 bitmap('FinalFigures/compare_estimatedSS3_allMethods2.tiff', height = 190, width = 190, units = 'mm', res = 900)
 	print(ggplot(mergedf, aes(x = AGE, y = FREQUENCY)) +

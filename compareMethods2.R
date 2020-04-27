@@ -391,6 +391,159 @@ allMethodsPropYear = rbind(allMethodsPropYear, met4df)
 # allMethodsPropYear = rbind(allMethodsPropYear, met6df)
 
 
+#  ------------------------------------------------------------------------
+# 5) GAM (Lorenzo's approach) per year: AGE ~ s(LENGTH) 
+
+# continue script:
+mydatagam = data4
+
+# start loop over years
+yearsfac = sort(unique(mydatagam$YEAR))
+#saveModInd = NULL
+dwriteAll = NULL
+for(j in seq_along(yearsfac)){
+  
+  subdata = mydatagam[mydatagam$YEAR == yearsfac[j], ]
+  data3tmp = data3[data3$YEAR == yearsfac[j], ]
+  
+  # run the model GAM:
+  age_gam = gam(AGE~s(LENGTH), data=subdata, family = tw, 
+			method = 'REML')
+
+
+  # predict data
+  data3tmp$AGE = as.vector(predict(age_gam,newdata=data3tmp,type='response'))
+
+  #Round ages (makes sense?): 
+  data3tmp$AGEROUND = round(data3tmp$AGE,0)
+  data3tmp$AGEROUND = ifelse(test = data3tmp$AGEROUND > agePlus, agePlus, data3tmp$AGEROUND)
+	
+  dwriteAll = rbind(dwriteAll, data3tmp)
+  
+}
+
+dwriteAll2 = aggregate(dwriteAll$FREQUENCY, list(YEAR = dwriteAll$YEAR, AGE = dwriteAll$AGEROUND), sum)
+#catchtot = aggregate(data2$NUMBER_FISH, list(YEAR = data2$YEAR), sum)
+catchtot = aggregate(dwriteAll2$x, list(YEAR = dwriteAll2$YEAR), sum)
+catchinorder = catchtot$x[match(dwriteAll2$YEAR, catchtot$YEAR)]
+dwriteAll2$x = dwriteAll2$x/catchinorder
+met5df = dwriteAll2 
+
+names(met5df) = c('YEAR', 'AGE', 'FREQUENCY')
+
+met5df$METHOD = 'Method5'
+
+# Save data frame:
+allMethodsPropYear = rbind(allMethodsPropYear, met5df)
+
+
+#  ------------------------------------------------------------------------
+# 6) GAM (CRL approach) per year: PROPAGE ~ LENGTH 
+
+mydatagam = data4
+#mydatagam = mydatagam[mydatagam$AGE >= minEstAge, ] # CUT IN firstAgeCRL ALL DATA!
+# Its better if I set the initial age to model and estimate the final age for each year.
+# Its important to discuss this in the manuscript as a drawback of this method.
+
+# define age plus and len vector:
+lenvec = allLens
+
+AgeYearTab = table(mydatagam$AGE, mydatagam$YEAR)
+
+# start loop over years
+yearsfac = sort(unique(mydatagam$YEAR))
+fac = yearsfac
+
+# Estimate age prop per year
+# create age prop matrix:
+met6df = NULL
+#colnames(PropAgeMat) = allages
+
+# Add age-abundance matrix:
+#AbunAgeMat = matrix(NA, ncol = length(allages), nrow = length(yearsfac))
+#colnames(AbunAgeMat) = sort(allages) 
+for(j in seq_along(yearsfac)){
+
+  tmptab = AgeYearTab[ ,colnames(AgeYearTab) == yearsfac[j]]
+  tmpages = as.numeric(names(tmptab))
+  tmpfreq = as.vector(tmptab)
+
+  # plusAgeCRL = agesCRL(ages = tmpages, freq = tmpfreq, thr = 5) # 5 ind as a thr?
+  plusAgeCRL = agePlus
+  #print(plusAgeCRL)
+	
+  subdata = mydatagam[mydatagam$YEAR == yearsfac[j], ]
+  data3sub = data3[data3$YEAR == yearsfac[j], ]
+  
+  subdata$AGE = ifelse(test = subdata$AGE > plusAgeCRL, plusAgeCRL, subdata$AGE) # plus group for that specific year
+
+  # all ages for that year
+  allages = sort(unique(subdata$AGE))
+
+  # for each year
+	PropAgeMat = matrix(NA, ncol = length(allages), nrow = 1) 
+	colnames(PropAgeMat) = allages
+
+  # run the model GAM:
+  matPreds = matrix(NA, ncol = length(allages), nrow = nrow(data3sub))
+  for(ii in seq_along(allages)){
+    
+    if(ii == length(allages)){
+      predvals = rep(1, times = nrow(data3sub))
+    } else {
+      
+      subdata$AGEFAC = ifelse(test = subdata$AGE > allages[ii], 0, 1)
+      modtmp = gam(AGEFAC ~ LENGTH,family = binomial,
+                   data = subdata, method = "ML")
+      predtmp = predict(modtmp, newdata = data3sub, type = 'response')
+      predvals = as.vector(predtmp)
+	  elimina = which(subdata$AGEFAC == 1)
+	  if(length(elimina) > 0) {
+		subdata = subdata[-which(subdata$AGEFAC == 1), ]
+	  } else {
+		subdata = subdata
+	  }
+      
+    }
+    
+    matPreds[,ii] = predvals
+    
+  }
+  
+  matPreds2 = matrix(NA, ncol = length(allages), nrow = nrow(data3sub))
+  for(kk in seq_along(allages)){
+    
+    if(kk == 1){
+      matPreds2[,kk] = matPreds[,kk]
+    } else {
+      mattmp = 1 - as.matrix(matPreds[,(kk-1):1])
+      matPreds2[,kk] =  matPreds[,kk]*apply(X = mattmp, MARGIN = 1, FUN = prod) 
+    }
+    
+  }
+    
+  
+    abunage = t(matPreds2) %*% as.matrix(data3sub$C_L_I)
+    
+    propage = abunage/sum(abunage)
+    propage2 = as.data.frame(propage)
+	names(propage2) = 'FREQUENCY'	
+	propage2$YEAR = yearsfac[j]
+	propage2$AGE = allages
+	propage3 = propage2[ , c('YEAR', 'AGE', 'FREQUENCY')]
+	
+	met6df = rbind(met6df, propage3) 
+    
+}
+
+met6df$METHOD = 'Method6'
+
+# Save data frame:
+allMethodsPropYear = rbind(allMethodsPropYear, met6df)
+
+
+
+
 
 
 # END OF ALL METHODS
@@ -408,7 +561,7 @@ allMethodsPropYear = allMethodsPropYear[allMethodsPropYear$YEAR >= iniYearSam, ]
 
 
 if(ix == 1){
-	write.csv(allMethodsPropYear, paste0('simData/AllPropData', scenarioName, '.csv'), row.names = FALSE) # It is better to calculate RMSEage and RMSEyear and RMSEtot in Excel to avoid confusion.
+	write.csv(allMethodsPropYear, paste0('simData/AllPropData_3', scenarioName, '.csv'), row.names = FALSE) # It is better to calculate RMSEage and RMSEyear and RMSEtot in Excel to avoid confusion.
 }
 
 #  ------------------------------------------------------------------------
@@ -453,5 +606,5 @@ for(k in seq_along(FacYear)){
 dir.create('simPerInd1', showWarnings = FALSE)
 dir.create('simPerInd2', showWarnings = FALSE)
 
-write.csv(allMethodsPropYear, paste0('simPerInd1/replicate1_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
-write.csv(allMethodsPropYear2, paste0('simPerInd2/replicate2_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
+write.csv(allMethodsPropYear, paste0('simPerInd1/replicate1_3_', ix, '_', scenarioName, '.csv'), row.names = FALSE)
+write.csv(allMethodsPropYear2, paste0('simPerInd2/replicate2_3_', ix, '_', scenarioName, '.csv'), row.names = FALSE)

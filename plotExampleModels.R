@@ -74,7 +74,7 @@ outAL = calc_ALK(x = tmpMat2)
 plotoutAL1 = outAL[rownames(outAL) %in% plotLens,]
 plotoutAL1 = melt(data = plotoutAL1)
 names(plotoutAL1) = c('LENGTH', 'AGE','PROP')
-plotoutAL1$METHOD = 'Method1'
+plotoutAL1$METHOD = 'pooled ALK'
 
 # Save data frame:
 allMethodsProps = rbind(allMethodsProps, plotoutAL1)
@@ -116,7 +116,7 @@ k = 1
 plotoutAL2 = outAL[rownames(outAL) %in% plotLens,]
 plotoutAL2 = melt(data = plotoutAL2)
 names(plotoutAL2) = c('LENGTH', 'AGE','PROP')
-plotoutAL2$METHOD = 'Method2'
+plotoutAL2$METHOD = 'annual ALK'
 
 # Save data frame:
 allMethodsProps = rbind(allMethodsProps, plotoutAL2)
@@ -152,7 +152,7 @@ j = 1
 plotoutAL3 = data3tmp[,c('LENGTH', 'AGEROUND')]
 names(plotoutAL3) = c('LENGTH', 'AGE')
 plotoutAL3$PROP = 1
-plotoutAL3$METHOD = 'Method3'
+plotoutAL3$METHOD = 'GAM'
 
 # Save data frame:
 allMethodsProps = rbind(allMethodsProps, plotoutAL3)
@@ -247,10 +247,11 @@ rownames(matPreds2) = plotLens
 colnames(matPreds2) = 1:8
 plotoutAL4 = melt(data = matPreds2)
 names(plotoutAL4) = c('LENGTH', 'AGE','PROP')
-plotoutAL4$METHOD = 'Method4'
+plotoutAL4$METHOD = 'CRL'
 
 # Save data frame:
 allMethodsProps = rbind(allMethodsProps, plotoutAL4)
+allMethodsProps$METHOD = factor(allMethodsProps$METHOD, levels = c('pooled ALK', 'annual ALK', 'GAM', 'CRL')) # THESE ARE TRUE VALUES
 
 # PLOT SECTION
 # ----------------------------------------------------------------------
