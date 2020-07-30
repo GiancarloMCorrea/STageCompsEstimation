@@ -6,8 +6,8 @@ setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 	# define if simulation is run. if simulation is FALSE, all plots will be created.
 	simulation = TRUE
 	# Scenario name:
-	scenario1 = 'HighS'
-	scenario2 = 'HighT'
+	scenario1 = 'NoS'
+	scenario2 = 'NoT'
 	scenarioName = paste0(scenario1, '_', scenario2)
 
 # Scenarios definitions:
@@ -72,8 +72,9 @@ M_par = 0.34
 
 # I consider that the best way to control the spatiotemporal variability in growth and spawning time on size-at-age CV is 
 # to fix these number and just vary saptial and temporal components of the K parameter. 
-CV1 = 0.8 # this is a sd. 3.45 is the value in SS
-CV2 = 3 # this is a sd. 9.586 is the value in SS
+CV1 = 3.45 # this is a sd. 3.45 is the value in SS. 0.8, 2.41, 3.45, 4.485
+CV2 = 9.586 # this is a sd. 9.586 is the value in SS. 3, 6.7, 9.586, 9.586
+typeCV = expression('high-'*sigma[a])
 
 L1_par = 10 # same as SS. L1
 A1_par = 0.5 # same as SS. a3
@@ -90,16 +91,25 @@ SelecFish = c(0, 0.000231637, 0.00279779, 0.0328583, 0.29149, 0.832831, 0.983694
 SelecSurv = c(0, 1, 1, 1, 1, 1, 1, 1, 1, 
               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)# SURVEY. from age 0 to 20. be sure it has same length as allAges
 
+YearALKPlot = 2004
+agePlus = 8
+
 # Derived quantities:
 allAges = seq(from = minAge, to = maxAge, by = dT)
 allYears = seq(from = iniYear, to = endYear, by = dT)
 allYearsSam = seq(from = iniYearSam, to = endYear, by = dT)
 allLens = seq(from = minLen, to = maxLen, by = lenBin)
 
+PhiPopulation = matrix(0, ncol = length(allAges), nrow = length(allLens))
+AbunLenAgePopulation = matrix(0, ncol = length(allAges), nrow = length(allLens))
+AbunLenAgePopulation2 = matrix(0, ncol = length(minEstAge:agePlus), nrow = length(allLens))
+AbunLAGrid = AbunLenAgePopulation2
+
+indYearALK = which(allYears == YearALKPlot)
+
 # --------------------------------------------------------------
 # Parameters for the estimation part
 
-agePlus = 8
 
 # some colors
 gradColors = rev(brewer.pal(n = 9, name = "Spectral"))

@@ -22,6 +22,7 @@ ix = 1
 	require(reshape)
 	require(gridExtra)
 	require(statmod)
+	require(fields)
 
 
 	# call aux functions needed for the simulation:

@@ -4,9 +4,9 @@ library(foreach)
 library(doParallel)
 library(doSNOW)
 
-#setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
+setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
 # Number of replicates
-nSim = 350
+nSim = 10
 
 cores = detectCores()
 cl = makeCluster(cores[1] - 2)
@@ -27,8 +27,10 @@ foreach(ix = 1:nSim) %dopar% {
 	library(RColorBrewer)
 	require(geoR)
 	require(RandomFields)
-	require(gridExtra)
 	require(reshape)
+	require(gridExtra)
+	require(statmod)
+	require(fields)
 
 	# call aux functions needed for the simulation:
 	source('auxFunctionsSimulation.R', local = TRUE)

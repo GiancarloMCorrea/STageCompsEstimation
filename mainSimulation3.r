@@ -83,7 +83,7 @@ for(k in seq_along(allYears)){
     # Create Age Length matrix after first half: (just for sampled grids)
 	
 	if(j %in% sampleStations$sampledGrids & allYears[k] %in% allYearsSam){
-	
+		
 		AgeLenMatrixProp = matrix(NA, ncol = length(allAges), nrow = length(allLens))
 		
 		for(i in 1:nrow(AgeLenMatrixProp)){
@@ -114,6 +114,27 @@ for(k in seq_along(allYears)){
 		}
 		
 		AgeLenMatrix = sweep(AgeLenMatrixProp, MARGIN=2, nTmp2, `*`)
+
+		if(k == indYearALK & ix == 1) {
+			PhiPopulation = PhiPopulation + AgeLenMatrixProp
+			AbunLenAgePopulation = AbunLenAgePopulation + AgeLenMatrix
+		}
+
+		# SAVE INFO FOR ONE GRID:
+
+		if(j == sampleStations$sampledGrids[1] & k == indYearALK & ix == 1){
+
+				AbunLAGrid[,1] = AgeLenMatrix[, c(2)]
+				AbunLAGrid[,2:7] = AgeLenMatrix[, 3:8]
+				AbunLAGrid[,8] = rowSums(AgeLenMatrix[, 9:ncol(AgeLenMatrix)])
+
+				ALKpopGrid = calc_ALK(x = AbunLAGrid)
+
+				write.csv(ALKpopGrid, paste0('ALKPopulationGrid', scenarioName, '_CV1_', CV1, '_CV2_', CV2, '.csv'))
+
+		}
+
+
 		
 # Here: sampling strategy:
 # --------------------
@@ -322,4 +343,65 @@ if(ix == 1){
 	print(ax3)
 			
 	dev.off()  
+}
+
+if(ix == 1){
+
+	PhiPopulation = PhiPopulation/length(sampleStations$sampledGrids)
+
+	png(paste0('PhiPopulation_', scenarioName, '_CV1_', CV1, '_CV2_', CV2, '.png'), height = 550, width = 700, units = 'px', res = 130)
+
+		par(mar = c(4,4,0.5, 1))
+		image.plot(t(PhiPopulation), axes = FALSE, xlab = 'Ages', ylab = 'Length (cm)', legend.lab = 'Proportion', legend.line = 2.8)
+		axis(2, at = seq(0, 1, length.out = 5), labels = floor(seq(minLen, maxLen, length.out = 5)), las = 2)
+		axis(1, at = seq(0, 1, length.out = maxAge+1), labels = seq(minAge, maxAge, by = 1))
+
+	dev.off()
+
+	png(paste0('AbunAgeLenPopulation_', scenarioName, '_CV1_', CV1, '_CV2_', CV2, '.png'), height = 550, width = 700, units = 'px', res = 130)
+
+		par(mar = c(4,4,0.5, 1))
+		image.plot(t(AbunLenAgePopulation[,-c(1,10:21)]), axes = FALSE, xlab = 'Ages', ylab = 'Length (cm)', legend.lab = 'Abundance', legend.line = 2.8)
+		axis(2, at = seq(0, 1, length.out = 5), labels = floor(seq(minLen, maxLen, length.out = 5)), las = 2)
+		axis(1, at = seq(0, 1, length.out = agePlus), labels = seq(minEstAge, agePlus, by = 1))
+
+	dev.off()
+
+
+	rownames(AbunLenAgePopulation) = allLens
+	colnames(AbunLenAgePopulation) = allAges
+	AbunLenAgePopulation3 = AbunLenAgePopulation[,1:9]
+	newAbunLen = melt(AbunLenAgePopulation3)
+	names(newAbunLen) = c('Length', 'Age', 'Abundance')
+
+	png(paste0('AbunAgeLenPopulation_Mat_', scenarioName, '_CV1_', CV1, '_CV2_', CV2, '.png'), height = 550, width = 700, units = 'px', res = 135)
+
+		ggplot(newAbunLen, aes(x=Length,y=Abundance,group=factor(Age),colour=factor(Age))) +
+			geom_line(linetype = "solid") +
+			xlab(label = 'Length (cm)') +
+	    	ylab(label = 'Abundance') +
+			theme_bw() +
+			labs(colour = "Age") +
+			xlim(0, 115) +
+			theme(legend.position = c(0.8, 0.6)) +
+			ggtitle(typeCV)
+
+	dev.off()
+
+	#AbunLenAgePopulation2[,1] = rowSums(AbunLenAgePopulation[, c(1,2)])
+	AbunLenAgePopulation2[,1] = AbunLenAgePopulation[, c(2)]
+	AbunLenAgePopulation2[,2:7] = AbunLenAgePopulation[, 3:8]
+	AbunLenAgePopulation2[,8] = rowSums(AbunLenAgePopulation[, 9:ncol(AbunLenAgePopulation)])
+
+	ALKpopulation = calc_ALK(x = AbunLenAgePopulation2)
+
+	png(paste0('ALKPopulation_', scenarioName, '_CV1_', CV1, '_CV2_', CV2, '.png'), height = 550, width = 700, units = 'px', res = 130)
+
+		par(mar = c(4,4,0.5, 1))
+		image.plot(t(ALKpopulation), axes = FALSE, xlab = 'Ages', ylab = 'Length (cm)', legend.lab = 'Proportion', legend.line = 2.8)
+		axis(2, at = seq(0, 1, length.out = 5), labels = floor(seq(minLen, maxLen, length.out = 5)), las = 2)
+		axis(1, at = seq(0, 1, length.out = agePlus), labels = seq(minEstAge, agePlus, by = 1))
+
+	dev.off()
+
 }
