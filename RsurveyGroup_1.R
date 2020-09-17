@@ -1,3 +1,5 @@
+# SET YOUR WORKING DIRECTORY !!
+
 # SCRIPT TO COMPARE AGE ABUNDANCE ESTIMATES BY ALK AND CRL
 rm(list = ls())
 
@@ -7,6 +9,11 @@ require(fishmethods)
 require(reshape2)
 require(ggplot2)
 
+# Read data:
+cdata = read.csv('POLLOCK_CATCH_2015_2019.csv')
+ldata = read.csv('POLLOCK_LENGTH_2015_2019.csv')
+adata = read.csv('POLLOCK_AGE_2015_2019.csv')
+
 
 # Some parameters 
 sel_year = 2017
@@ -14,12 +21,8 @@ min_age = 1
 age_plus = 12
 sel_station = c('A-05', 'G-15', 'H-15', 'J-15', 'M-30', 'J-10', 'E-11', 'K-08', 'H-07')
 
-# --------------------------------------------------------------
-# Read data:
-cdata = read.csv('POLLOCK_CATCH_2015_2019.csv')
-ldata = read.csv('POLLOCK_LENGTH_2015_2019.csv')
-adata = read.csv('POLLOCK_AGE_2015_2019.csv')
 
+# --------------------------------------------------------------
 # subset data:
 cdata = cdata[cdata$YEAR == sel_year, ]
 ldata = ldata[ldata$YEAR == sel_year, ]
@@ -45,7 +48,7 @@ ldata$STATIONID = as.character(ldata$STATIONID)
 adata$STATIONID = as.character(adata$STATIONID)
 
 
-# ALK approach --------------------------------------------------
+# 1) ALK approach --------------------------------------------------
 
 # Create length vs age freq (entire age subsample data):
 ALK_tmp = table(adata$LENGTH, adata$AGE)
@@ -59,13 +62,13 @@ tmp_station = aggregate(tmp_ldata$FREQUENCY, list(STATIONID = tmp_ldata$STATIONI
 # Make a function to calculate Proportions by station
 alk_calc = function(station_data){
   
-  find_pos = match(station_data$LENGTH, len)
-  find_pos_2 = find_pos[!is.na(find_pos)]
+  find_pos = match(station_data$LENGTH, len) 
+  find_pos_2 = find_pos[!is.na(find_pos)] # if length bin is not present in age subsample, remove it
   nl[find_pos_2] = station_data$x[!is.na(find_pos)]
   
   alkData = cbind(len, nl, ALK_tmp)
   alkData = as.data.frame(alkData)
-  prop_station = alkprop(alkData)
+  prop_station = alkprop(alkData) # use function in fishmethods (explain briefly)
   return(data.frame(AGE = min_age:age_plus, PROP = prop_station$results$prop))
   
 }  
@@ -88,7 +91,7 @@ alk_data$METHOD = 'ALK'
 
 
 
-# CRL approach ------------------------------------------------------------
+# 2) CRL approach ------------------------------------------------------------
 
 # Create new data frame:
 tmp_adata = adata
@@ -108,7 +111,7 @@ for(ii in seq_along(all_ages)){
     
     tmp_adata$AGEFAC = ifelse(test = tmp_adata$AGE > all_ages[ii], 0, 1)
     modtmp = gam(AGEFAC ~ s(LENGTH) + s(LON, LAT, k = 10), family = binomial,
-                 data = tmp_adata)
+                 data = tmp_adata) # here is the model
     predtmp = predict(modtmp, newdata = ldata, type = 'response')
     predvals = as.vector(predtmp)
     elimina = which(tmp_adata$AGEFAC == 1)
@@ -124,6 +127,7 @@ for(ii in seq_along(all_ages)){
   
 }
 
+# conditional probability:
 matPreds2 = matrix(NA, ncol = length(all_ages), nrow = nrow(ldata))
 for(kk in seq_along(all_ages)){
   
@@ -136,11 +140,14 @@ for(kk in seq_along(all_ages)){
   
 }
 
+# Here, we already have proportions by age
 
+# Calculate C_a_i
 tempo2 = sweep(matPreds2, MARGIN = 1, ldata$C_l_i, `*`)
 rownames(tempo2) = ldata$STATIONID
 colnames(tempo2) = min_age:age_plus
 
+# Order data frame:
 tmp_station = tempo2[rownames(tempo2) %in% sel_station, ]
 tmp_station = reshape2::melt(tmp_station)
 crl_data = aggregate(tmp_station$value, list(STATIONID = tmp_station$Var1, AGE = tmp_station$Var2), sum)

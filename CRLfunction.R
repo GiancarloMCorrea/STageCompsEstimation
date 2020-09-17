@@ -4,19 +4,20 @@
 # It is designed to incorporate different minimum and maximum ages for different years. 
 # Moreover, it is run by year or other temporal variable (e.g. quarter)
 
-# Advice: Check your data first. Make sure that you have the right values for each variable in DataModel (age dataset) and DataEstimation (length dataset).
-# See the manuscript for details.
+# Advice: Check your data before running this function. 
+# Make sure that you have the right values for each variable in DataModel (age dataset) and DataEstimation (length dataset).
+# See the manuscript for details: Correa et al. (2020)
 
 # Arguments:
 
 # DataModel = dataset (data.frame), which includes all variables used in the FormulaGAM specification and an 'Age' column.
-# DataEstimation = dataset (data.frame), which includes all variables used in the FormulaGAM specification.
+# DataEstimation = dataset (data.frame), used for prediction based on FormulaGAM. 
 #                  Its column names should match all variables used in FormulaGAM (explanatory variables).      
 # FormulaGAM = character object. Formula of ONLY explanatory variables to be passed to the 'gam' function. (e.g. 'LENGTH + s(LON, LAT)')
 # AgeMin = an integer or vector (numeric). Minimum age to be estimated. If a integer is specified, it will be used for all TimeVariable classes ('unique'). 
-#          If a vector is specified, it should be the same length of all classes in TimeVariable. (i.e. length(AgeMin) = 5 if unique(TimeVariable) = 5). 
+#          If a vector is specified, it should be the same length of all classes in TimeVariable. (i.e. length(AgeMin) = 5 if length(unique(TimeVariable)) = 5). 
 #          Moreover, if a vector is specified, it will follow the same order as sort(unique(TimeVariable)).
-# AgeMax = an integer or vector (numeric). Maximum age to be estimated. It follows the same logic of AgeMin. length(AgeMin) and length(AgeMax) do not need to be the same.
+# AgeMax = an integer or vector (numeric). Maximum age to be estimated. It follows the same logic of AgeMin. length(AgeMin) and length(AgeMax) do not need to have the same length.
 # AgeVariable = character. Column name of 'DataModel' to be used as the age variable (e.g. 'AGE')
 # TimeVariable = character. Column name of 'DataModel' to be used as the temporal variable (i.e. the model will be run for each time) (e.g. 'YEAR')
 # ... = further arguments for passing to 'gam' function.
@@ -131,16 +132,4 @@ estimateAgeCRL = function(DataModel, DataEstimation, FormulaGAM, AgeMin = 1, Age
 
 }
 
-# ---------------------------------------------------------------------
-# Example 1: 
 
-#setwd('C:/Users/moroncog/Documents/GitHub/STageCompsEstimation')
-
-data3 = read.csv('simData/paccod_len_Sim_HighS_HighT.csv')
-data4 = read.csv('simData/paccod_age_Sim_HighS_HighT.csv')
-
-data3 = data3[data3$YEAR < 1998, ]
-data4 = data4[data4$YEAR < 1998, ]
-
-newData = estimateAgeCRL(DataModel = data4, DataEstimation = data3, FormulaGAM = 'LENGTH + s(LON, LAT, k = 10)', 
-						 AgeMin = 1, AgeMax = 8, AgeVariable = 'AGE')
