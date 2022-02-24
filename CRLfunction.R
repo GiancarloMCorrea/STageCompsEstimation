@@ -5,25 +5,25 @@
 # Moreover, it is run by year or other temporal variable (e.g. quarter)
 
 # Advice: Check your data before running this function. 
-# Make sure that you have the right values for each variable in DataModel (age dataset) and DataEstimation (length dataset).
+# Make sure that you have the right values for each variable in AgeSubsample (age subsample) and LengthSubsample (length subsample).
 # See the manuscript for details: Correa et al. (2020)
 
 # Arguments:
 
-# DataModel = dataset (data.frame), which includes all variables used in the FormulaGAM specification and an 'Age' column.
-# DataEstimation = dataset (data.frame), used for prediction based on FormulaGAM. 
+# AgeSubsample = dataset (data.frame), which includes all variables used in the FormulaGAM specification and an 'Age' column.
+# LengthSubsample = dataset (data.frame), used for prediction based on FormulaGAM. 
 #                  Its column names should match all variables used in FormulaGAM (explanatory variables).      
 # FormulaGAM = character object. Formula of ONLY explanatory variables to be passed to the 'gam' function. (e.g. 'LENGTH + s(LON, LAT)')
 # AgeMin = an integer or vector (numeric). Minimum age to be estimated. If a integer is specified, it will be used for all TimeVariable classes ('unique'). 
 #          If a vector is specified, it should be the same length of all classes in TimeVariable. (i.e. length(AgeMin) = 5 if length(unique(TimeVariable)) = 5). 
 #          Moreover, if a vector is specified, it will follow the same order as sort(unique(TimeVariable)).
 # AgeMax = an integer or vector (numeric). Maximum age to be estimated. It follows the same logic of AgeMin. length(AgeMin) and length(AgeMax) do not need to have the same length.
-# AgeVariable = character. Column name of 'DataModel' to be used as the age variable (e.g. 'AGE')
-# TimeVariable = character. Column name of 'DataModel' to be used as the temporal variable (i.e. the model will be run for each time) (e.g. 'YEAR')
+# AgeVariable = character. Column name of 'AgeSubsample' to be used as the age variable (e.g. 'AGE')
+# TimeVariable = character. Column name of 'AgeSubsample' to be used as the temporal variable (i.e. the model will be run for each time) (e.g. 'YEAR')
 # ... = further arguments for passing to 'gam' function.
 
 
-estimateAgeCRL = function(DataModel, DataEstimation, FormulaGAM, AgeMin = 1, AgeMax = 8, AgeVariable, TimeVariable, ...){
+estimateAgeCRL = function(AgeSubsample, LengthSubsample, FormulaGAM, AgeMin = 1, AgeMax = 8, AgeVariable, TimeVariable, ...){
 
   require(mgcv)
   require(plyr)
@@ -32,13 +32,13 @@ estimateAgeCRL = function(DataModel, DataEstimation, FormulaGAM, AgeMin = 1, Age
   if(missing(TimeVariable)) print('No TimeVariable provided. Model is run using the whole dataset')
   
   if(!missing(TimeVariable)){
-    if(!(TimeVariable %in% names(DataModel))) stop('TimeVariable is not a column name in DataModel')
-    if(!(TimeVariable %in% names(DataEstimation))) stop('TimeVariable is not a column name in DataEstimation')
+    if(!(TimeVariable %in% names(AgeSubsample))) stop('TimeVariable is not a column name in AgeSubsample')
+    if(!(TimeVariable %in% names(LengthSubsample))) stop('TimeVariable is not a column name in LengthSubsample')
   }
 
   nAgeMin = length(AgeMin)
   nAgeMax = length(AgeMax)
-  nTimeVariable = length(unique(DataModel[ ,TimeVariable]))
+  nTimeVariable = length(unique(AgeSubsample[ ,TimeVariable]))
 
   if(nAgeMin > 1) {
     if(nTimeVariable != nAgeMin) stop('AgeMin does not have the same length as the TimeVariable classes')
@@ -53,16 +53,16 @@ estimateAgeCRL = function(DataModel, DataEstimation, FormulaGAM, AgeMin = 1, Age
   #Data2 = Data
   if(missing(TimeVariable)) {
     TimeVariable = 'Time'
-    DataModel[ ,TimeVariable] = 1
-    DataEstimation[ ,TimeVariable] = 1
+    AgeSubsample[ ,TimeVariable] = 1
+    LengthSubsample[ ,TimeVariable] = 1
   }
 
-  TimeFac = sort(unique(DataModel[ ,TimeVariable]))
+  TimeFac = sort(unique(AgeSubsample[ ,TimeVariable]))
   FormulaGAM2 = as.formula(paste0('Pi_a ~ ', FormulaGAM))
 
   nAgesAll = max(AgeMax) - min(AgeMin) + 1
-  finalReport = data.frame(matrix(ncol = ncol(DataEstimation) + nAgesAll, nrow = 0))
-  colNames2 = c(colnames(DataEstimation), min(AgeMin):max(AgeMax))
+  finalReport = data.frame(matrix(ncol = ncol(LengthSubsample) + nAgesAll, nrow = 0))
+  colNames2 = c(colnames(LengthSubsample), min(AgeMin):max(AgeMax))
   colnames(finalReport) = colNames2
 
   # Begin loop over time variable:
@@ -71,8 +71,8 @@ estimateAgeCRL = function(DataModel, DataEstimation, FormulaGAM, AgeMin = 1, Age
       if(nAgeMin == 1) AgeMin = rep(AgeMin, times = nTimeVariable)
       if(nAgeMax == 1) AgeMax = rep(AgeMax, times = nTimeVariable)
 
-      subdata = DataModel[DataModel[ ,TimeVariable] == TimeFac[j], ]
-      data3sub = DataEstimation[DataEstimation[ ,TimeVariable] == TimeFac[j], ]
+      subdata = AgeSubsample[AgeSubsample[ ,TimeVariable] == TimeFac[j], ]
+      data3sub = LengthSubsample[LengthSubsample[ ,TimeVariable] == TimeFac[j], ]
       
       subdata[,AgeVariable] = ifelse(test = subdata[,AgeVariable] > AgeMax[j], AgeMax[j], subdata[,AgeVariable]) 
 
