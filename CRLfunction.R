@@ -64,6 +64,7 @@ estimateAgeCRL = function(AgeSubsample, LengthSubsample, FormulaGAM, AgeMin = 1,
   finalReport = data.frame(matrix(ncol = ncol(LengthSubsample) + nAgesAll, nrow = 0))
   colNames2 = c(colnames(LengthSubsample), min(AgeMin):max(AgeMax))
   colnames(finalReport) = colNames2
+  ageMatrix_final = NULL
 
   # Begin loop over time variable:
     for(j in seq_along(TimeFac)){
@@ -125,10 +126,11 @@ estimateAgeCRL = function(AgeSubsample, LengthSubsample, FormulaGAM, AgeMin = 1,
     colnames(matPreds3) = allages
     tmpReport = cbind(data3sub, matPreds3)
     finalReport = rbind.fill(finalReport, tmpReport)
+    ageMatrix_final = rbind(ageMatrix_final, matPreds3)
         
     }
 
-  return(finalReport)
+  return(list(merged_data = finalReport, prop_age_matrix = ageMatrix_final))
 
 }
 
