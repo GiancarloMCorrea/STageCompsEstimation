@@ -1,3 +1,9 @@
+This is the code to run the analyses found in:
+
+> Correa, G.M., Ciannelli, L., Barnett, L.A., Kotwicki, S., Fuentes, C., 2020. Improved estimation of age composition by accounting for spatiotemporal variability in somatic growth. Canadian Journal of Fisheries and Aquatic Sciences 77, 1810–1821. [https://doi.org/10.1139/cjfas-2020-0166](https://doi.org/10.1139/cjfas-2020-0166)
+
+# Tutorial
+
 This is a tutorial to estimate age compositions from fishery-independent
 sources (e.g. survey) using classic age-length keys and continuation
 ratio logits (Berg and Kristensen 2012). These two methods were
